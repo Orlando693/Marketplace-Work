@@ -1,0 +1,23 @@
+package com.troyecto.marketplace.dtos.orderItem;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class OrderItemResponse {
+
+    private Long id;
+    private Integer quantity;
+    private Double price;
+    private Double subtotal;
+
+    private Long orderId;
+
+    private Long productId;
+    private String productName;
+}
