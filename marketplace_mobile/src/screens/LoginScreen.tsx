@@ -1,23 +1,39 @@
+// src/screens/LoginScreen.tsx
 import React, { useState } from "react";
 import { View, Text, TextInput, Pressable, Alert } from "react-native";
 import { router } from "expo-router";
-import { api } from "../../services/api";
-import { useAuthStore } from "../../store/authStore";
+import { api } from "../services/api";
+import { useAuthStore } from "../store/useAuthStore";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const setAuth = useAuthStore((state) => state.setAuth);
+
+  const setUser = useAuthStore((s) => s.setUser);
+  const setToken = useAuthStore((s) => s.setToken);
 
   const handleLogin = async () => {
     try {
-      const res = await api.post("/auth/login", { email, password });
-      const { user, token } = res.data; // ajusta a lo que devuelva tu backend
-      setAuth(user, token);
+      // Ajusta el body a lo que espera tu AuthController
+      const res = await api.post("/auth/login", {
+        email,      // o username, según tu backend
+        password,
+      });
+
+      // Ajusta esto a la respuesta real de tu backend
+      const { user, token } = res.data;
+
+      // Guardar en Zustand + AsyncStorage
+      await setUser(user);
+      await setToken(token);
+
       router.replace("/home");
-    } catch (e) {
-      console.error(e);
-      Alert.alert("Error", "No se pudo iniciar sesión. Verifica tus datos.");
+    } catch (e: any) {
+      console.error(e?.response?.data || e.message);
+      Alert.alert(
+        "Error",
+        "No se pudo iniciar sesión. Verifica tus credenciales o la conexión."
+      );
     }
   };
 
@@ -71,7 +87,6 @@ export default function LoginScreen() {
           </Pressable>
         </View>
 
-        {/* Footer */}
         <Text className="text-[11px] text-slate-500 text-center mt-6">
           Backend: Spring Boot · Auth: JWT · Cliente: React Native + NativeWind
         </Text>
