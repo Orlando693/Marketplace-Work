@@ -1,9 +1,10 @@
 package com.troyecto.marketplace.security;
-import io.github.cdimascio.dotenv.Dotenv;
+//import io.github.cdimascio.dotenv.Dotenv; //ANTERIOR: Usaba .env
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -15,44 +16,49 @@ import java.util.function.Function;
  * JwtService
  * -----------------------------------------------------
  * ✔ Genera y valida tokens JWT
- * ✔ Carga la clave desde .env o variables del sistema
+ * ✔ Carga la clave desde application.properties
  * ✔ Extrae claims, usuario y expiración
  */
 @Service
 public class JwtService {
-    private final Dotenv dotenv = Dotenv.configure()
-            .ignoreIfMissing() // Evita excepción si .env no existe
-            .load();
+    
+    // ACTUAL: Lee desde application.properties
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    // ANTERIOR: Usaba Dotenv para leer .env
+    // private final Dotenv dotenv = Dotenv.configure()
+    //         .ignoreIfMissing()
+    //         .load();
 
     private Key key;
 
     /**
-     * ✅ Inicializa la clave al iniciar el servicio (producción segura)
+     * ✅ Inicializa la clave al iniciar el servicio
      */
     @PostConstruct
     public void initKey() {
-        String secret = null;
-
-        // 1️⃣ Intentar leer desde .env
-        try {
-            secret = dotenv.get("JWT_SECRET");
-        } catch (Exception ignored) {
+        // ACTUAL: Validación desde @Value
+        if (jwtSecret == null || jwtSecret.isBlank()) {
+            throw new IllegalStateException("❌ jwt.secret no está configurado en application.properties");
         }
 
-        // 2️⃣ Intentar leer desde variable de entorno
-        if (secret == null || secret.isBlank()) {
-            secret = System.getenv("JWT_SECRET");
-        }
+        // ANTERIOR: Intentaba leer desde .env y variables de entorno
+        // String secret = null;
+        // try {
+        //     secret = dotenv.get("JWT_SECRET");
+        // } catch (Exception ignored) {}
+        // if (secret == null || secret.isBlank()) {
+        //     secret = System.getenv("JWT_SECRET");
+        // }
+        // if (secret == null || secret.isBlank()) {
+        //     throw new IllegalStateException("❌ No se encontró JWT_SECRET");
+        // }
 
-        // 3️⃣ Si no se encuentra, lanzar error controlado
-        if (secret == null || secret.isBlank()) {
-            throw new IllegalStateException("❌ No se encontró JWT_SECRET ni en .env ni en variables del sistema");
-        }
-
-        // 4️⃣ Validar tamaño mínimo (256 bits = 32 bytes codificados Base64)
-        byte[] keyBytes = Decoders.BASE64.decode(secret.trim());
-        if (keyBytes.length < 32) {
-            throw new IllegalStateException("❌ La clave JWT_SECRET es demasiado corta. Debe ser ≥ 256 bits (usa openssl rand -base64 64)");
+        // Decodificar y validar tamaño mínimo para HS512 (512 bits = 64 bytes)
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret.trim());
+        if (keyBytes.length < 64) {
+            throw new IllegalStateException("❌ La clave jwt.secret es demasiado corta para HS512. Debe ser ≥ 512 bits (64 bytes en Base64)");
         }
 
         this.key = Keys.hmacShaKeyFor(keyBytes);
