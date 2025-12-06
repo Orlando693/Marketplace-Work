@@ -2,9 +2,8 @@
 import { useState, useEffect } from "react";
 import { View, Text, FlatList, Pressable, Alert, RefreshControl } from "react-native";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { getAllUsers, deleteUser, User } from "../services/UserService";
-import { Loading, EmptyState, Button } from "../components/ui";
+import { getAllUsers, deleteUser, User } from "../services/userService";
+import { Loading, EmptyState } from "../components/ui";
 
 export default function UserListScreen() {
   const [users, setUsers] = useState<User[]>([]);
@@ -18,9 +17,17 @@ export default function UserListScreen() {
   const loadUsers = async () => {
     try {
       const res = await getAllUsers();
-      setUsers(res.data);
+      console.log("API Response:", res);
+      console.log("Users data:", res.data);
+      
+      // El backend devuelve ApiResponse<List<UserResponse>>
+      // Verificar si res.data tiene la estructura { data: [...], message: "..." }
+      const usersArray = (res.data as any)?.data || res.data;
+      console.log("Users array:", usersArray);
+      
+      setUsers(Array.isArray(usersArray) ? usersArray : []);
     } catch (error) {
-      console.error(error);
+      console.error("Error loading users:", error);
       Alert.alert("Error", "Could not load users");
     } finally {
       setLoading(false);
@@ -75,89 +82,96 @@ export default function UserListScreen() {
     <View className="flex-1 bg-slate-50">
       {/* Header */}
       <View className="bg-white px-6 py-4 border-b border-slate-200">
-        <Text className="text-2xl font-bold text-slate-800">User List</Text>
-        <Text className="text-slate-600 mt-1">
-          {users.length} {users.length === 1 ? "user" : "users"} registered
-        </Text>
+        <View className="flex-row justify-between items-center">
+          <View>
+            <Text className="text-2xl font-bold text-slate-800">User List</Text>
+            <Text className="text-slate-600 mt-1">
+              {users.length} {users.length === 1 ? "user" : "users"} registered
+            </Text>
+          </View>
+          <Pressable
+            onPress={() => router.push("/user-form")}
+            className="bg-primary-500 px-4 py-2 rounded-lg active:bg-primary-600"
+          >
+            <Text className="text-white font-semibold">Add User</Text>
+          </Pressable>
+        </View>
       </View>
 
-      {/* List */}
+      {/* Tabla */}
       <FlatList
         data={users}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ padding: 16 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        ListHeaderComponent={() => (
+          <View className="bg-slate-800 flex-row px-4 py-3">
+            <Text className="text-white font-bold text-xs w-12">ID</Text>
+            <Text className="text-white font-bold text-xs flex-1">Name</Text>
+            <Text className="text-white font-bold text-xs flex-1">Email</Text>
+            <Text className="text-white font-bold text-xs w-20">Phone</Text>
+            <Text className="text-white font-bold text-xs w-24">Role</Text>
+            <Text className="text-white font-bold text-xs w-32 text-center">Actions</Text>
+          </View>
+        )}
         renderItem={({ item }) => (
-          <View className="bg-white rounded-2xl p-4 mb-4 shadow-lg border border-slate-200">
-            {/* Header con nombre y rol */}
-            <View className="flex-row justify-between items-start mb-3">
-              <View className="flex-1">
-                <Text className="text-lg font-bold text-slate-800">
-                  {item.firstName} {item.lastName}
-                </Text>
-                <View
-                  className={`px-3 py-1 rounded-full mt-1 self-start ${
-                    item.role === "ROLE_ADMIN" ? "bg-primary-100" : "bg-slate-100"
+          <View className="bg-white flex-row px-4 py-3 border-b border-slate-200 items-center">
+            {/* ID */}
+            <Text className="text-slate-600 text-xs w-12">{item.id}</Text>
+            
+            {/* Name */}
+            <View className="flex-1">
+              <Text className="text-slate-800 font-semibold text-sm">
+                {item.firstName} {item.lastName}
+              </Text>
+              <Text className="text-slate-500 text-xs">{item.address}</Text>
+            </View>
+            
+            {/* Email */}
+            <Text className="text-slate-600 text-xs flex-1" numberOfLines={1}>
+              {item.email}
+            </Text>
+            
+            {/* Phone */}
+            <Text className="text-slate-600 text-xs w-20">{item.phone}</Text>
+            
+            {/* Role */}
+            <View className="w-24">
+              <View
+                className={`px-2 py-1 rounded ${
+                  item.role === "ROLE_ADMIN" ? "bg-primary-100" : "bg-slate-100"
+                }`}
+              >
+                <Text
+                  className={`text-xs font-semibold text-center ${
+                    item.role === "ROLE_ADMIN" ? "text-primary-700" : "text-slate-700"
                   }`}
+                  numberOfLines={1}
                 >
-                  <Text
-                    className={`text-xs font-semibold ${
-                      item.role === "ROLE_ADMIN" ? "text-primary-700" : "text-slate-700"
-                    }`}
-                  >
-                    {item.role}
-                  </Text>
-                </View>
+                  {item.role.replace("ROLE_", "")}
+                </Text>
               </View>
-              <Text className="text-slate-400 text-sm">#{item.id}</Text>
             </View>
-
-            {/* Información de contacto */}
-            <View className="space-y-2 mb-4">
-              <View className="flex-row items-center">
-                <Ionicons name="mail-outline" size={18} color="#64748b" />
-                <Text className="text-slate-600 ml-2">{item.email}</Text>
-              </View>
-              {item.phone && (
-                <View className="flex-row items-center">
-                  <Ionicons name="call-outline" size={18} color="#64748b" />
-                  <Text className="text-slate-600 ml-2">{item.phone}</Text>
-                </View>
-              )}
-              {item.address && (
-                <View className="flex-row items-center">
-                  <Ionicons name="location-outline" size={18} color="#64748b" />
-                  <Text className="text-slate-600 ml-2">{item.address}</Text>
-                </View>
-              )}
-            </View>
-
-            {/* Botones de acción */}
-            <View className="flex-row gap-2">
-              <Button
-                title="Edit"
-                variant="outline"
+            
+            {/* Actions */}
+            <View className="flex-row gap-1 w-32 justify-center">
+              <Pressable
                 onPress={() => router.push(`/user-form?id=${item.id}`)}
-              />
-              <Button
-                title="Delete"
-                variant="danger"
+                className="bg-warning-500 px-3 py-1 rounded active:bg-warning-600"
+              >
+                <Text className="text-white text-xs font-semibold">Edit</Text>
+              </Pressable>
+              <Pressable
                 onPress={() => handleDelete(item.id)}
-              />
+                className="bg-danger-500 px-3 py-1 rounded active:bg-danger-600"
+              >
+                <Text className="text-white text-xs font-semibold">Delete</Text>
+              </Pressable>
             </View>
           </View>
         )}
       />
-
-      {/* Botón flotante para agregar */}
-      <Pressable
-        onPress={() => router.push("/user-form")}
-        className="absolute bottom-6 right-6 bg-primary-500 w-16 h-16 rounded-full items-center justify-center shadow-lg active:bg-primary-600"
-      >
-        <Text className="text-white text-3xl">+</Text>
-      </Pressable>
     </View>
   );
 }

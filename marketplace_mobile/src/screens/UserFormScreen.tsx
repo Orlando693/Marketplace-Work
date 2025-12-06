@@ -9,8 +9,8 @@ import {
   Alert,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { addUser, getUser, updateUser } from "../services/UserService";
-import { Input, Button, Loading } from "../components/ui";
+import { addUser, getUser, updateUser } from "../services/userService";
+import { Input, Button, Loading, Select } from "../components/ui";
 
 export default function UserFormScreen() {
   const params = useLocalSearchParams();
@@ -25,7 +25,6 @@ export default function UserFormScreen() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [password, setPassword] = useState("");
   const [role, setRole] = useState("ROLE_USER");
 
   const [errors, setErrors] = useState({
@@ -34,7 +33,6 @@ export default function UserFormScreen() {
     email: "",
     phone: "",
     address: "",
-    password: "",
     role: "",
   });
 
@@ -42,6 +40,7 @@ export default function UserFormScreen() {
     if (isEditing) {
       fetchUser();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const fetchUser = async () => {
@@ -54,9 +53,8 @@ export default function UserFormScreen() {
       setEmail(user.email);
       setPhone(user.phone || "");
       setAddress(user.address || "");
-      setPassword(user.password);
       setRole(user.role || "ROLE_USER");
-    } catch (error) {
+    } catch {
       Alert.alert("Error", "Could not load user");
       router.back();
     } finally {
@@ -71,7 +69,6 @@ export default function UserFormScreen() {
       email: "",
       phone: "",
       address: "",
-      password: "",
       role: "",
     };
 
@@ -79,7 +76,9 @@ export default function UserFormScreen() {
     if (!lastName.trim()) newErrors.lastName = "Last name is required";
     if (!email.trim()) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Invalid email format";
-    if (!isEditing && !password.trim()) newErrors.password = "Password is required";
+    if (!phone.trim()) newErrors.phone = "Phone is required";
+    else if (!/^\d{8}$/.test(phone.trim())) newErrors.phone = "Phone must have exactly 8 digits";
+    if (!address.trim()) newErrors.address = "Address is required";
     if (!role.trim()) newErrors.role = "Role is required";
 
     setErrors(newErrors);
@@ -97,7 +96,6 @@ export default function UserFormScreen() {
         email: email.trim(),
         phone: phone.trim(),
         address: address.trim(),
-        password: password,
         role: role,
       };
 
@@ -128,10 +126,12 @@ export default function UserFormScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1 bg-slate-50"
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
       <ScrollView
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
         {/* Header */}
         <View className="mb-6">
@@ -181,15 +181,16 @@ export default function UserFormScreen() {
           />
 
           <Input
-            label="Phone"
-            placeholder="e.g., +1234567890"
+            label="Phone (8 digits)"
+            placeholder="e.g., 12345678"
             value={phone}
             onChangeText={(text) => {
               setPhone(text);
               setErrors({ ...errors, phone: "" });
             }}
             error={errors.phone}
-            keyboardType="phone-pad"
+            keyboardType="number-pad"
+            maxLength={8}
           />
 
           <Input
@@ -203,32 +204,22 @@ export default function UserFormScreen() {
             error={errors.address}
           />
 
-          {!isEditing && (
-            <Input
-              label="Password"
-              placeholder="Enter password"
-              value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                setErrors({ ...errors, password: "" });
-              }}
-              error={errors.password}
-              secureTextEntry
-            />
-          )}
-
-          <Input
+          <Select
             label="Role"
-            placeholder="ROLE_USER or ROLE_ADMIN"
             value={role}
-            onChangeText={(text) => {
-              setRole(text);
+            onValueChange={(value) => {
+              setRole(value);
               setErrors({ ...errors, role: "" });
             }}
+            options={[
+              { label: "-- Select Role --", value: "" },
+              { label: "ADMIN", value: "ROLE_ADMIN" },
+              { label: "USER", value: "ROLE_USER" },
+            ]}
             error={errors.role}
           />
 
-          <View className="flex-row gap-3 mt-4">
+          <View className="flex-row gap-3 mt-4 mb-6">
             <View className="flex-1">
               <Button
                 title="Cancel"

@@ -4,3 +4,4 @@ export { default as Card, CardHeader, CardBody, CardFooter } from "./Card";
 export { default as Input } from "./Input";
 export { default as Loading } from "./Loading";
 export { default as EmptyState } from "./EmptyState";
+export { default as Select } from "./Select";
