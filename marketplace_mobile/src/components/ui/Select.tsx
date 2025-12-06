@@ -9,6 +9,7 @@ interface SelectProps {
   onValueChange: (value: string) => void;
   options: { label: string; value: string }[];
   error?: string;
+  placeholder?: string;
 }
 
 export default function Select({
@@ -17,6 +18,7 @@ export default function Select({
   onValueChange,
   options,
   error,
+  placeholder = "Select an option",
 }: SelectProps) {
   const [modalVisible, setModalVisible] = useState(false);
   const selectedOption = options.find((opt) => opt.value === value);
@@ -28,12 +30,13 @@ export default function Select({
       {/* Select Button */}
       <Pressable
         onPress={() => setModalVisible(true)}
-        className={`rounded-lg bg-slate-50 border ${
-          error ? "border-danger-500" : "border-slate-300"
-        } px-4 py-3 flex-row justify-between items-center`}
+        className="rounded-lg bg-slate-50 border px-4 py-3 flex-row justify-between items-center"
+        style={{ borderColor: error ? "#ef4444" : "#cbd5e1" }}
       >
-        <Text className={selectedOption?.value ? "text-slate-900" : "text-slate-400"}>
-          {selectedOption?.label || "Select an option"}
+        <Text
+          style={{ color: selectedOption?.value ? "#0f172a" : "#94a3b8" }}
+        >
+          {selectedOption?.label || placeholder}
         </Text>
         <Ionicons name="chevron-down" size={20} color="#64748b" />
       </Pressable>
@@ -67,17 +70,16 @@ export default function Select({
                     onValueChange(option.value);
                     setModalVisible(false);
                   }}
-                  className={`p-4 border-b border-slate-100 ${
-                    option.value === value ? "bg-primary-50" : ""
-                  }`}
+                  className="p-4 border-b border-slate-100"
+                  style={{ backgroundColor: option.value === value ? "#eff6ff" : "transparent" }}
                 >
                   <View className="flex-row justify-between items-center">
                     <Text
-                      className={`text-base ${
-                        option.value === value
-                          ? "text-primary-600 font-semibold"
-                          : "text-slate-700"
-                      }`}
+                      className="text-base"
+                      style={{
+                        color: option.value === value ? "#3b82f6" : "#334155",
+                        fontWeight: option.value === value ? "600" : "400",
+                      }}
                     >
                       {option.label}
                     </Text>

@@ -61,7 +61,7 @@ export default function HomeScreen() {
 
           {/* Orders */}
           <Pressable
-            onPress={() => Alert.alert("Orders", "Module coming soon")}
+            onPress={() => router.push("/order-list")}
             className="flex-1 min-w-[45%] bg-white rounded-2xl p-5 items-center shadow-lg border-2 border-slate-800 active:scale-95"
           >
             <Ionicons name="cart-outline" size={40} color="#1e293b" />
