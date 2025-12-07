@@ -15,17 +15,19 @@ export default function ProductListScreen() {
 
   const loadProducts = async () => {
     try {
+      console.log("🔄 Loading products...");
       const res = await getAllProducts();
-      console.log("API Response:", res);
-      console.log("Products data:", res.data);
+      console.log("📦 Products API Response:", res);
+      console.log("📦 Products data:", res.data);
       
       // El backend devuelve ApiResponse<List<ProductResponse>>
       const productsArray = (res.data as any)?.data || res.data;
-      console.log("Products array:", productsArray);
+      console.log("✅ Products array parsed:", productsArray);
+      console.log("📊 Number of products:", productsArray?.length || 0);
       
       setProducts(Array.isArray(productsArray) ? productsArray : []);
     } catch (error) {
-      console.error("Error loading products:", error);
+      console.error("❌ Error loading products:", error);
       Alert.alert("Error", "Could not load products");
     } finally {
       setLoading(false);
@@ -177,9 +179,9 @@ export default function ProductListScreen() {
                   <View className="flex-1">
                     <View className="flex-row items-center mb-1">
                       <Ionicons name="storefront-outline" size={16} color="#64748b" />
-                      <Text className="text-xs text-slate-500 ml-1.5">Store ID</Text>
+                      <Text className="text-xs text-slate-500 ml-1.5">Store</Text>
                     </View>
-                    <Text className="text-base font-bold text-slate-800">#{item.storeId}</Text>
+                    <Text className="text-base font-bold text-slate-800">{item.storeName || `Store #${item.storeId}`}</Text>
                   </View>
                   <View className="flex-1">
                     <View className="flex-row items-center mb-1">

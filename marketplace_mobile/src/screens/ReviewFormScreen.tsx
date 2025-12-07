@@ -75,7 +75,8 @@ export default function ReviewFormScreen() {
     setLoading(true);
     try {
       const res = await getReview(reviewId!);
-      const review = res.data;
+      // Handle ApiResponse wrapper from backend
+      const review = (res.data as any)?.data || res.data;
       setRating(review.rating);
       setComment(review.comment);
       setUserId(review.userId.toString());
@@ -134,8 +135,8 @@ export default function ReviewFormScreen() {
       const payload = {
         rating: rating,
         comment: comment.trim(),
-        userId: parseInt(userId, 10),
-        productId: parseInt(productId, 10),
+        userId: parseInt(userId.toString(), 10),
+        productId: parseInt(productId.toString(), 10),
       };
 
       if (isEditing) {
@@ -223,7 +224,7 @@ export default function ReviewFormScreen() {
           {/* Rating Section */}
           <View className="mb-6">
             <Text className="text-lg font-bold text-slate-700 mb-4">
-              ⭐ Calificación
+              Calificación
             </Text>
             {renderStarSelector()}
           </View>
@@ -231,7 +232,7 @@ export default function ReviewFormScreen() {
           {/* Comment Section */}
           <View className="mb-6">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              💬 Comentario
+              Comentario
             </Text>
             <Input
               label="Tu Reseña"
@@ -254,7 +255,7 @@ export default function ReviewFormScreen() {
           {/* User Selection */}
           <View className="mb-4">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              👤 Información del Usuario
+              Información del Usuario
             </Text>
           </View>
 
@@ -270,9 +271,9 @@ export default function ReviewFormScreen() {
               setErrors({ ...errors, userId: "" });
             }}
             options={users.map((user) => ({
-              id: user.id.toString(),
+              id: user.id,
               label: `${user.firstName} ${user.lastName}`,
-              subtitle: `${user.email} • ${user.phoneNumber}`,
+              subtitle: `${user.email} • ${user.phone}`,
             }))}
             placeholder={userName || "Seleccionar usuario"}
             error={errors.userId}
@@ -282,7 +283,7 @@ export default function ReviewFormScreen() {
           {/* Product Selection */}
           <View className="mb-4 mt-6">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              📦 Información del Producto
+              Información del Producto
             </Text>
           </View>
 
@@ -298,7 +299,7 @@ export default function ReviewFormScreen() {
               setErrors({ ...errors, productId: "" });
             }}
             options={products.map((product) => ({
-              id: product.id.toString(),
+              id: product.id,
               label: product.name,
               subtitle: `$${product.price} • ${product.storeName || "Tienda Desconocida"}`,
             }))}
@@ -322,7 +323,7 @@ export default function ReviewFormScreen() {
                 ))}
               </View>
               <Text className="text-blue-800 text-sm" numberOfLines={3}>
-                "{comment}"
+                &quot;{comment}&quot;
               </Text>
             </View>
           )}

@@ -31,15 +31,18 @@ export const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   console.log(`🔵 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+  console.log(`🔑 Token from store:`, token ? `"${token.substring(0, 20)}..."` : 'null/undefined');
   
-  // Solo agregar el header si el token existe, no es null, y no está vacío
-  if (token && typeof token === 'string' && token.trim().length > 0) {
+  // Validar que el token tenga el formato correcto de JWT (debe tener 2 puntos)
+  const isValidJWT = token && typeof token === 'string' && token.trim().length > 0 && token.split('.').length === 3;
+  
+  if (isValidJWT) {
     config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
-    console.log("🔑 Token added to request");
+    console.log("✅ Valid JWT token added to request");
   } else {
-    console.log("⚪ No token - public request");
-    // Asegurarse de que no haya un header Authorization vacío
+    console.log("⚠️ Invalid or missing token - removing Authorization header");
+    // Asegurarse de que no haya un header Authorization vacío o inválido
     if (config.headers && config.headers.Authorization) {
       delete config.headers.Authorization;
     }

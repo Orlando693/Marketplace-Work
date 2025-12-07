@@ -33,7 +33,7 @@ export default function SearchableSelect({
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const selectedOption = options.find((opt) => opt.id === value);
+  const selectedOption = options.find((opt) => opt.id === Number(value));
   const displayText = selectedOption ? selectedOption.label : placeholder;
 
   const filteredOptions = options.filter(

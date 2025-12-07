@@ -3,6 +3,8 @@ import { useState, useCallback } from "react";
 import { View, Text, FlatList, Pressable, Alert, RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { getAllReviews, deleteReview, Review } from "../services/reviewService";
+import { getAllUsers } from "../services/userService";
+import { getAllProducts } from "../services/productService";
 import { Loading, EmptyState } from "../components/ui";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -14,17 +16,44 @@ export default function ReviewListScreen() {
 
   const loadReviews = async () => {
     try {
-      const res = await getAllReviews();
-      console.log("API Response:", res);
-      console.log("Reviews data:", res.data);
+      console.log("🔄 Loading reviews, users, and products...");
+      const [reviewsRes, usersRes, productsRes] = await Promise.all([
+        getAllReviews(),
+        getAllUsers(),
+        getAllProducts(),
+      ]);
+      
+      console.log("📦 Reviews response:", reviewsRes.data);
+      console.log("👥 Users response:", usersRes.data);
+      console.log("🛍️ Products response:", productsRes.data);
       
       // El backend devuelve ApiResponse<List<ReviewResponse>>
-      const reviewsArray = (res.data as any)?.data || res.data;
-      console.log("Reviews array:", reviewsArray);
+      const reviewsArray = (reviewsRes.data as any)?.data || reviewsRes.data;
+      const usersArray = (usersRes.data as any)?.data || usersRes.data;
+      const productsArray = (productsRes.data as any)?.data || productsRes.data;
       
-      setReviews(Array.isArray(reviewsArray) ? reviewsArray : []);
+      console.log("✅ Parsed arrays:", {
+        reviews: reviewsArray?.length || 0,
+        users: usersArray?.length || 0,
+        products: productsArray?.length || 0
+      });
+      
+      // Enriquecer las reviews con los nombres de usuario y producto
+      const enrichedReviews = (Array.isArray(reviewsArray) ? reviewsArray : []).map((review: Review) => {
+        const user = usersArray.find((u: any) => u.id === review.userId);
+        const product = productsArray.find((p: any) => p.id === review.productId);
+        
+        return {
+          ...review,
+          userName: user ? `${user.firstName} ${user.lastName}` : undefined,
+          productName: product ? product.name : undefined,
+        };
+      });
+      
+      console.log("✨ Enriched reviews:", enrichedReviews);
+      setReviews(enrichedReviews);
     } catch (error) {
-      console.error("Error loading reviews:", error);
+      console.error("❌ Error loading reviews:", error);
       Alert.alert("Error", "Could not load reviews");
     } finally {
       setLoading(false);
@@ -176,14 +205,14 @@ export default function ReviewListScreen() {
                     <Ionicons name="person-outline" size={16} color="#64748b" />
                     <Text className="text-xs text-slate-500 ml-1.5">User</Text>
                   </View>
-                  <Text className="text-base font-bold text-slate-800">User #{item.userId}</Text>
+                  <Text className="text-base font-bold text-slate-800">{item.userName || `User #${item.userId}`}</Text>
                 </View>
                 <View className="flex-1">
                   <View className="flex-row items-center mb-1">
                     <Ionicons name="cube-outline" size={16} color="#64748b" />
                     <Text className="text-xs text-slate-500 ml-1.5">Product</Text>
                   </View>
-                  <Text className="text-base font-bold text-slate-800">Product #{item.productId}</Text>
+                  <Text className="text-base font-bold text-slate-800">{item.productName || `Product #${item.productId}`}</Text>
                 </View>
               </View>
               <View className="flex-row">

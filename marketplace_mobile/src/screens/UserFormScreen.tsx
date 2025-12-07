@@ -47,7 +47,8 @@ export default function UserFormScreen() {
     setLoading(true);
     try {
       const res = await getUser(userId!);
-      const user = res.data;
+      // Handle ApiResponse wrapper from backend
+      const user = (res.data as any)?.data || res.data;
       setFirstName(user.firstName);
       setLastName(user.lastName);
       setEmail(user.email);

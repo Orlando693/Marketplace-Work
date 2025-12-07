@@ -63,47 +63,47 @@ public class DataSeeder implements CommandLineRunner {
         List<User> users = new ArrayList<>();
 
         User user1 = User.builder()
-                .firstName("John")
-                .lastName("Doe")
-                .email("john.doe@example.com")
-                .phone("555-0101")
-                .address("123 Main St, New York, NY 10001")
+                .firstName("Carlos")
+                .lastName("García")
+                .email("carlos.garcia@example.com")
+                .phone("71234567")
+                .address("Av. Arce 2345, La Paz, Bolivia")
                 .role("ROLE_USER")
                 .build();
 
         User user2 = User.builder()
-                .firstName("Jane")
-                .lastName("Smith")
-                .email("jane.smith@example.com")
-                .phone("555-0102")
-                .address("456 Oak Ave, Los Angeles, CA 90001")
+                .firstName("María")
+                .lastName("López")
+                .email("maria.lopez@example.com")
+                .phone("72345678")
+                .address("Calle Comercio 456, Santa Cruz, Bolivia")
                 .role("ROLE_USER")
                 .build();
 
         User user3 = User.builder()
-                .firstName("Michael")
-                .lastName("Johnson")
-                .email("michael.j@example.com")
-                .phone("555-0103")
-                .address("789 Pine Rd, Chicago, IL 60601")
+                .firstName("Juan")
+                .lastName("Martínez")
+                .email("juan.martinez@example.com")
+                .phone("73456789")
+                .address("Av. Ballivián 789, Cochabamba, Bolivia")
                 .role("ROLE_ADMIN")
                 .build();
 
         User user4 = User.builder()
-                .firstName("Emily")
-                .lastName("Williams")
-                .email("emily.w@example.com")
-                .phone("555-0104")
-                .address("321 Elm St, Houston, TX 77001")
+                .firstName("Ana")
+                .lastName("Rodríguez")
+                .email("ana.rodriguez@example.com")
+                .phone("74567890")
+                .address("Calle Bolívar 321, Sucre, Bolivia")
                 .role("ROLE_USER")
                 .build();
 
         User user5 = User.builder()
-                .firstName("David")
-                .lastName("Brown")
-                .email("david.b@example.com")
-                .phone("555-0105")
-                .address("654 Maple Dr, Phoenix, AZ 85001")
+                .firstName("Luis")
+                .lastName("Fernández")
+                .email("luis.fernandez@example.com")
+                .phone("75678901")
+                .address("Av. 6 de Agosto 654, La Paz, Bolivia")
                 .role("ROLE_USER")
                 .build();
 
@@ -120,8 +120,8 @@ public class DataSeeder implements CommandLineRunner {
         List<Store> stores = new ArrayList<>();
 
         Store store1 = Store.builder()
-                .name("Tech Paradise")
-                .description("Your one-stop shop for all things tech")
+                .name("Tecnología Total")
+                .description("Tu tienda de tecnología de confianza")
                 .category("Electronics")
                 .isActive(true)
                 .user(users.get(0))
@@ -129,8 +129,8 @@ public class DataSeeder implements CommandLineRunner {
                 .build();
 
         Store store2 = Store.builder()
-                .name("Fashion Hub")
-                .description("Latest trends in fashion and accessories")
+                .name("Moda y Estilo")
+                .description("Las últimas tendencias en moda y accesorios")
                 .category("Clothing")
                 .isActive(true)
                 .user(users.get(1))
@@ -138,8 +138,8 @@ public class DataSeeder implements CommandLineRunner {
                 .build();
 
         Store store3 = Store.builder()
-                .name("Book Haven")
-                .description("Books for every reader")
+                .name("Librería El Saber")
+                .description("Libros para todos los gustos")
                 .category("Books")
                 .isActive(true)
                 .user(users.get(2))
@@ -147,8 +147,8 @@ public class DataSeeder implements CommandLineRunner {
                 .build();
 
         Store store4 = Store.builder()
-                .name("Home Essentials")
-                .description("Everything you need for your home")
+                .name("Hogar Perfecto")
+                .description("Todo lo que necesitas para tu hogar")
                 .category("Furniture")
                 .isActive(true)
                 .user(users.get(3))
@@ -166,10 +166,10 @@ public class DataSeeder implements CommandLineRunner {
     private List<Product> createProducts(List<Store> stores) {
         List<Product> products = new ArrayList<>();
 
-        // Tech Paradise Products
+        // Productos de Tecnología Total
         products.add(Product.builder()
                 .name("iPhone 15 Pro")
-                .description("Latest Apple smartphone with A17 chip")
+                .description("Último smartphone de Apple con chip A17")
                 .price(new BigDecimal("999.99"))
                 .stock(50)
                 .store(stores.get(0))
@@ -179,7 +179,7 @@ public class DataSeeder implements CommandLineRunner {
 
         products.add(Product.builder()
                 .name("Samsung Galaxy S24")
-                .description("Flagship Android phone with AI features")
+                .description("Teléfono Android insignia con funciones de IA")
                 .price(new BigDecimal("899.99"))
                 .stock(35)
                 .store(stores.get(0))
@@ -189,7 +189,7 @@ public class DataSeeder implements CommandLineRunner {
 
         products.add(Product.builder()
                 .name("MacBook Pro M3")
-                .description("Powerful laptop for professionals")
+                .description("Laptop potente para profesionales")
                 .price(new BigDecimal("1999.99"))
                 .stock(20)
                 .store(stores.get(0))
@@ -197,10 +197,10 @@ public class DataSeeder implements CommandLineRunner {
                 .publishedDate(LocalDateTime.now().minusDays(5))
                 .build());
 
-        // Fashion Hub Products
+        // Productos de Moda y Estilo
         products.add(Product.builder()
-                .name("Designer Leather Jacket")
-                .description("Premium quality leather jacket")
+                .name("Chaqueta de Cuero Premium")
+                .description("Chaqueta de cuero de calidad superior")
                 .price(new BigDecimal("299.99"))
                 .stock(15)
                 .store(stores.get(1))
@@ -209,8 +209,8 @@ public class DataSeeder implements CommandLineRunner {
                 .build());
 
         products.add(Product.builder()
-                .name("Casual Denim Jeans")
-                .description("Comfortable everyday jeans")
+                .name("Jeans Casual")
+                .description("Jeans cómodos para uso diario")
                 .price(new BigDecimal("79.99"))
                 .stock(100)
                 .store(stores.get(1))
@@ -219,8 +219,8 @@ public class DataSeeder implements CommandLineRunner {
                 .build());
 
         products.add(Product.builder()
-                .name("Summer Dress Collection")
-                .description("Elegant summer dresses")
+                .name("Vestido de Verano")
+                .description("Elegantes vestidos para el verano")
                 .price(new BigDecimal("149.99"))
                 .stock(45)
                 .store(stores.get(1))
@@ -228,10 +228,10 @@ public class DataSeeder implements CommandLineRunner {
                 .publishedDate(LocalDateTime.now().minusDays(7))
                 .build());
 
-        // Book Haven Products
+        // Productos de Librería El Saber
         products.add(Product.builder()
-                .name("The Great Novel")
-                .description("Award-winning contemporary fiction")
+                .name("Cien Años de Soledad")
+                .description("Clásico de la literatura latinoamericana")
                 .price(new BigDecimal("24.99"))
                 .stock(80)
                 .store(stores.get(2))
@@ -240,8 +240,8 @@ public class DataSeeder implements CommandLineRunner {
                 .build());
 
         products.add(Product.builder()
-                .name("Programming Guide 2024")
-                .description("Complete guide to modern programming")
+                .name("Guía de Programación 2024")
+                .description("Guía completa de programación moderna")
                 .price(new BigDecimal("49.99"))
                 .stock(60)
                 .store(stores.get(2))
@@ -249,10 +249,10 @@ public class DataSeeder implements CommandLineRunner {
                 .publishedDate(LocalDateTime.now().minusDays(6))
                 .build());
 
-        // Home Essentials Products
+        // Productos de Hogar Perfecto
         products.add(Product.builder()
-                .name("Modern Coffee Table")
-                .description("Stylish coffee table for living room")
+                .name("Mesa de Centro Moderna")
+                .description("Elegante mesa de centro para sala")
                 .price(new BigDecimal("399.99"))
                 .stock(25)
                 .store(stores.get(3))
@@ -261,8 +261,8 @@ public class DataSeeder implements CommandLineRunner {
                 .build());
 
         products.add(Product.builder()
-                .name("Ergonomic Office Chair")
-                .description("Comfortable chair for long work hours")
+                .name("Silla Ergonómica de Oficina")
+                .description("Silla cómoda para largas jornadas de trabajo")
                 .price(new BigDecimal("299.99"))
                 .stock(30)
                 .store(stores.get(3))
@@ -280,9 +280,9 @@ public class DataSeeder implements CommandLineRunner {
                 .subtotal(999.99)
                 .totalAmount(1080)
                 .tax(80.00)
-                .currency("USD")
+                .currency("BOB")
                 .payMethod("Visa")
-                .paymentStatus("Complete")
+                .paymentStatus("Completado")
                 .orderDate(LocalDateTime.now().minusDays(3))
                 .user(users.get(0))
                 .build());
@@ -291,9 +291,9 @@ public class DataSeeder implements CommandLineRunner {
                 .subtotal(449.98)
                 .totalAmount(486)
                 .tax(36.00)
-                .currency("USD")
+                .currency("BOB")
                 .payMethod("MasterCard")
-                .paymentStatus("Complete")
+                .paymentStatus("Completado")
                 .orderDate(LocalDateTime.now().minusDays(2))
                 .user(users.get(1))
                 .build());
@@ -302,9 +302,9 @@ public class DataSeeder implements CommandLineRunner {
                 .subtotal(299.99)
                 .totalAmount(324)
                 .tax(24.00)
-                .currency("USD")
+                .currency("BOB")
                 .payMethod("Paypal")
-                .paymentStatus("Pending")
+                .paymentStatus("Pendiente")
                 .orderDate(LocalDateTime.now().minusDays(1))
                 .user(users.get(3))
                 .build());
@@ -313,9 +313,9 @@ public class DataSeeder implements CommandLineRunner {
                 .subtotal(149.99)
                 .totalAmount(162)
                 .tax(12.00)
-                .currency("USD")
+                .currency("BOB")
                 .payMethod("Visa")
-                .paymentStatus("Complete")
+                .paymentStatus("Completado")
                 .orderDate(LocalDateTime.now().minusHours(12))
                 .user(users.get(4))
                 .build());
@@ -378,7 +378,7 @@ public class DataSeeder implements CommandLineRunner {
 
         reviews.add(Review.builder()
                 .rating(5)
-                .comment("Excellent product! Highly recommended.")
+                .comment("¡Excelente producto! Muy recomendado.")
                 .user(users.get(0))
                 .product(products.get(0))
                 .createdAt(LocalDateTime.now().minusDays(2))
@@ -387,7 +387,7 @@ public class DataSeeder implements CommandLineRunner {
 
         reviews.add(Review.builder()
                 .rating(4)
-                .comment("Good quality, fast shipping.")
+                .comment("Buena calidad, envío rápido.")
                 .user(users.get(1))
                 .product(products.get(1))
                 .createdAt(LocalDateTime.now().minusDays(3))
@@ -396,7 +396,7 @@ public class DataSeeder implements CommandLineRunner {
 
         reviews.add(Review.builder()
                 .rating(5)
-                .comment("Perfect! Exactly what I needed.")
+                .comment("¡Perfecto! Justo lo que necesitaba.")
                 .user(users.get(2))
                 .product(products.get(3))
                 .createdAt(LocalDateTime.now().minusDays(1))
@@ -405,7 +405,7 @@ public class DataSeeder implements CommandLineRunner {
 
         reviews.add(Review.builder()
                 .rating(3)
-                .comment("Good but a bit pricey.")
+                .comment("Bueno pero un poco caro.")
                 .user(users.get(3))
                 .product(products.get(5))
                 .createdAt(LocalDateTime.now().minusHours(18))
@@ -414,7 +414,7 @@ public class DataSeeder implements CommandLineRunner {
 
         reviews.add(Review.builder()
                 .rating(5)
-                .comment("Amazing quality and comfort!")
+                .comment("¡Increíble calidad y comodidad!")
                 .user(users.get(4))
                 .product(products.get(9))
                 .createdAt(LocalDateTime.now().minusHours(6))
@@ -423,7 +423,7 @@ public class DataSeeder implements CommandLineRunner {
 
         reviews.add(Review.builder()
                 .rating(4)
-                .comment("Very good book, enjoyed reading it.")
+                .comment("Muy buen libro, disfruté mucho leyéndolo.")
                 .user(users.get(0))
                 .product(products.get(6))
                 .createdAt(LocalDateTime.now().minusDays(4))

@@ -10,6 +10,7 @@ export interface Store {
   createdDate: string;
   userId: number;
   productIds: number[];
+  userName?: string;
 }
 
 export interface StoreRequest {

@@ -152,8 +152,8 @@ export default function OrderItemFormScreen() {
         quantity: parseInt(quantity, 10),
         price: parseFloat(price),
         subtotal: parseFloat(subtotal),
-        orderId: parseInt(orderId, 10),
-        productId: parseInt(productId, 10),
+        orderId: parseInt(orderId.toString(), 10),
+        productId: parseInt(productId.toString(), 10),
         productName: productName.trim(),
       };
 
@@ -219,7 +219,7 @@ export default function OrderItemFormScreen() {
           {/* Order Info Section */}
           <View className="mb-4">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              🛒 Selección de Orden
+              Selección de Orden
             </Text>
           </View>
 
@@ -235,7 +235,7 @@ export default function OrderItemFormScreen() {
               setErrors({ ...errors, orderId: "" });
             }}
             options={orders.map((order) => ({
-              id: order.id.toString(),
+              id: order.id,
               label: `Orden #${order.id}`,
               subtitle: `Total: $${order.totalAmount} • ${order.paymentStatus}`,
             }))}
@@ -247,7 +247,7 @@ export default function OrderItemFormScreen() {
           {/* Product Info Section */}
           <View className="mb-4 mt-6">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              📦 Selección de Producto
+              Selección de Producto
             </Text>
           </View>
 
@@ -265,7 +265,7 @@ export default function OrderItemFormScreen() {
               setErrors({ ...errors, productId: "" });
             }}
             options={products.map((product) => ({
-              id: product.id.toString(),
+              id: product.id,
               label: product.name,
               subtitle: `$${product.price} • Stock: ${product.stock}`,
             }))}
@@ -277,7 +277,7 @@ export default function OrderItemFormScreen() {
           {/* Quantity and Pricing */}
           <View className="mb-4 mt-6">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              💰 Cantidad y Precios
+              Cantidad y Precios
             </Text>
           </View>
 

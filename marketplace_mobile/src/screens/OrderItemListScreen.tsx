@@ -135,22 +135,7 @@ export default function OrderItemListScreen() {
               </View>
             </View>
 
-            {/* Product & Order Info */}
-            <View className="mb-4 space-y-3">
-              <View className="flex-row items-center">
-                <Ionicons name="pricetag-outline" size={16} color="#64748b" />
-                <Text className="text-slate-600 ml-2 text-sm flex-1">
-                  Product ID: <Text className="font-semibold text-slate-800">P-{item.productId}</Text>
-                </Text>
-              </View>
-              
-              <View className="flex-row items-center">
-                <Ionicons name="receipt-outline" size={16} color="#64748b" />
-                <Text className="text-slate-600 ml-2 text-sm flex-1">
-                  Order ID: <Text className="font-semibold text-slate-800">#{item.orderId}</Text>
-                </Text>
-              </View>
-            </View>
+
 
             {/* Financial Info */}
             <View className="bg-slate-50 rounded-xl p-4 mb-4">

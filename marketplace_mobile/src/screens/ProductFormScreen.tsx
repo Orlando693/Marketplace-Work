@@ -62,7 +62,8 @@ export default function ProductFormScreen() {
     setLoading(true);
     try {
       const res = await getProduct(productId!);
-      const product = res.data;
+      // Handle ApiResponse wrapper from backend
+      const product = (res.data as any)?.data || res.data;
       setName(product.name);
       setDescription(product.description);
       setPrice(product.price.toString());
@@ -123,7 +124,7 @@ export default function ProductFormScreen() {
         price: parseFloat(price),
         stock: parseInt(stock, 10),
         isAvailable: isAvailable,
-        storeId: parseInt(storeId, 10),
+        storeId: parseInt(storeId.toString(), 10),
         storeName: storeName.trim(),
       };
 
@@ -185,7 +186,7 @@ export default function ProductFormScreen() {
           {/* Basic Info Section */}
           <View className="mb-4">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              📦 Informacion del Producto
+              Informacion del Producto
             </Text>
           </View>
 
@@ -217,7 +218,7 @@ export default function ProductFormScreen() {
           {/* Pricing Section */}
           <View className="mb-6 mt-4">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              💰 Precio e Inventario
+              Precio e Inventario
             </Text>
           </View>
 
@@ -280,7 +281,7 @@ export default function ProductFormScreen() {
           {/* Availability Switch */}
           <View className="mb-6">
             <Text className="text-lg font-bold text-slate-700 mb-3">
-              📊 Estado de Disponibilidad
+              Estado de Disponibilidad
             </Text>
             <View className="bg-slate-50 p-4 rounded-lg border border-slate-200">
               <View className="flex-row justify-between items-center">
@@ -307,7 +308,7 @@ export default function ProductFormScreen() {
           {/* Store Info Section */}
           <View className="mb-4">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              🏪 Informacion de la Tienda
+              Informacion de la Tienda
             </Text>
           </View>
 
@@ -323,7 +324,7 @@ export default function ProductFormScreen() {
               setErrors({ ...errors, storeId: "" });
             }}
             options={stores.map((store) => ({
-              id: store.id.toString(),
+              id: store.id,
               label: store.name,
               subtitle: `${store.category}${store.isActive ? " • Activa" : " • Inactiva"}`,
             }))}

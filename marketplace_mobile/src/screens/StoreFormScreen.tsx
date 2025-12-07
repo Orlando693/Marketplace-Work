@@ -28,7 +28,6 @@ export default function StoreFormScreen() {
   const [category, setCategory] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [userId, setUserId] = useState<number | string>("");
-  const [selectedUserName, setSelectedUserName] = useState("");
 
   const [errors, setErrors] = useState({
     name: "",
@@ -73,18 +72,15 @@ export default function StoreFormScreen() {
     setLoading(true);
     try {
       const res = await getStore(storeId!);
-      const store = res.data;
+      // Handle ApiResponse wrapper from backend
+      const store = (res.data as any)?.data || res.data;
       setName(store.name);
       setDescription(store.description);
       setCategory(store.category);
       setIsActive(store.isActive);
-      setUserId(store.userId);
+      setUserId(store.userId.toString());
       
-      // Find and set selected user name
-      const user = users.find(u => u.id === store.userId);
-      if (user) {
-        setSelectedUserName(`${user.firstName} ${user.lastName}`);
-      }
+      // User will be set when selecting from dropdown
     } catch {
       Alert.alert("Error", "No se pudo cargar la tienda");
       router.back();
@@ -110,7 +106,7 @@ export default function StoreFormScreen() {
     if (!category.trim()) {
       newErrors.category = "La categoría es requerida";
     }
-    if (!userId.trim() || isNaN(Number(userId)) || Number(userId) <= 0) {
+    if (!userId.toString().trim() || isNaN(Number(userId)) || Number(userId) <= 0) {
       newErrors.userId = "El propietario es requerido";
     }
 
@@ -128,7 +124,7 @@ export default function StoreFormScreen() {
         description: description.trim(),
         category: category,
         isActive: isActive,
-        userId: parseInt(userId, 10),
+        userId: parseInt(userId.toString(), 10),
       };
 
       if (isEditing) {
@@ -197,7 +193,7 @@ export default function StoreFormScreen() {
           {/* Basic Info Section */}
           <View className="mb-4">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              🏪 Información de la Tienda
+              Información de la Tienda
             </Text>
           </View>
 
@@ -250,7 +246,7 @@ export default function StoreFormScreen() {
           {/* Status Section */}
           <View className="mb-6 mt-4">
             <Text className="text-lg font-bold text-slate-700 mb-3">
-              📊 Estado de la Tienda
+              Estado de la Tienda
             </Text>
             <View className="bg-slate-50 p-4 rounded-lg border border-slate-200">
               <View className="flex-row justify-between items-center">
@@ -277,16 +273,15 @@ export default function StoreFormScreen() {
           {/* Owner Section */}
           <View className="mb-4">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              👤 Información del Propietario
+              Información del Propietario
             </Text>
           </View>
 
           <SearchableSelect
             label="Propietario de la Tienda"
             value={userId}
-            onSelect={(id, label) => {
+            onSelect={(id) => {
               setUserId(id);
-              setSelectedUserName(label);
               setErrors({ ...errors, userId: "" });
             }}
             options={users.map(user => ({

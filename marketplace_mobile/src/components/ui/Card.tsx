@@ -1,4 +1,4 @@
-// src/components/ui/Card.tsx
+1// src/components/ui/Card.tsx
 import { View, Text, Pressable } from "react-native";
 import { ReactNode } from "react";
 

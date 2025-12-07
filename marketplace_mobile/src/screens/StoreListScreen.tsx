@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { View, Text, FlatList, Pressable, Alert, RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { getAllStores, deleteStore, Store } from "../services/storeService";
+import { getAllUsers } from "../services/userService";
 import { Loading, EmptyState } from "../components/ui";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -14,17 +15,38 @@ export default function StoreListScreen() {
 
   const loadStores = async () => {
     try {
-      const res = await getAllStores();
-      console.log("API Response:", res);
-      console.log("Stores data:", res.data);
+      console.log("🔄 Loading stores and users...");
+      const [storesRes, usersRes] = await Promise.all([
+        getAllStores(),
+        getAllUsers(),
+      ]);
+      
+      console.log("🏪 Stores response:", storesRes.data);
+      console.log("👥 Users response:", usersRes.data);
       
       // El backend devuelve ApiResponse<List<StoreResponse>>
-      const storesArray = (res.data as any)?.data || res.data;
-      console.log("Stores array:", storesArray);
+      const storesArray = (storesRes.data as any)?.data || storesRes.data;
+      const usersArray = (usersRes.data as any)?.data || usersRes.data;
       
-      setStores(Array.isArray(storesArray) ? storesArray : []);
+      console.log("✅ Parsed arrays:", {
+        stores: storesArray?.length || 0,
+        users: usersArray?.length || 0
+      });
+      
+      // Enriquecer las stores con los nombres de usuario
+      const enrichedStores = (Array.isArray(storesArray) ? storesArray : []).map((store: Store) => {
+        const user = usersArray.find((u: any) => u.id === store.userId);
+        
+        return {
+          ...store,
+          userName: user ? `${user.firstName} ${user.lastName}` : undefined,
+        };
+      });
+      
+      console.log("✨ Enriched stores:", enrichedStores);
+      setStores(enrichedStores);
     } catch (error) {
-      console.error("Error loading stores:", error);
+      console.error("❌ Error loading stores:", error);
       Alert.alert("Error", "Could not load stores");
     } finally {
       setLoading(false);
@@ -176,7 +198,7 @@ export default function StoreListScreen() {
                     <Ionicons name="person-outline" size={16} color="#64748b" />
                     <Text className="text-xs text-slate-500 ml-1.5">Owner</Text>
                   </View>
-                  <Text className="text-base font-bold text-slate-800">User #{item.userId}</Text>
+                  <Text className="text-base font-bold text-slate-800">{item.userName || `User #${item.userId}`}</Text>
                 </View>
               </View>
               <View className="flex-row">
@@ -185,7 +207,7 @@ export default function StoreListScreen() {
                     <Ionicons name="cube-outline" size={16} color="#64748b" />
                     <Text className="text-xs text-slate-500 ml-1.5">Products</Text>
                   </View>
-                  <Text className="text-base font-bold text-slate-800">{item.productsId?.length || 0} items</Text>
+                  <Text className="text-base font-bold text-slate-800">{item.productIds?.length || 0} items</Text>
                 </View>
                 <View className="flex-1">
                   <View className="flex-row items-center mb-1">

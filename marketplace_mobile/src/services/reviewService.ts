@@ -9,6 +9,8 @@ export interface Review {
   updatedDate: string;
   productId: number;
   userId: number;
+  userName?: string;
+  productName?: string;
 }
 
 export interface ReviewRequest {
