@@ -103,7 +103,7 @@ export default function HomeScreen() {
 
           {/* Products */}
           <Pressable
-            onPress={() => router.push("/list")}
+            onPress={() => router.push("/product-list")}
             className="flex-1 min-w-[45%] bg-white rounded-2xl p-5 items-center shadow-lg border-2 border-warning-500 active:scale-95"
           >
             <Ionicons name="bag-outline" size={40} color="#eab308" />

@@ -24,6 +24,8 @@ export default function RootLayout() {
       <Stack.Screen name="review-form" />
       <Stack.Screen name="store-list" />
       <Stack.Screen name="store-form" />
+      <Stack.Screen name="product-list" />
+      <Stack.Screen name="product-form" />
     </Stack>
   );
 }
