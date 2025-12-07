@@ -22,7 +22,7 @@ export default function HomeScreen() {
         confirmLogout();
       }
     } else {
-      Alert.alert("Cerrar sesión", "¿Estás seguro de salir?", [
+      Alert.alert("Cerrar sesión", "¿Estas seguro de salir?", [
         { text: "Cancelar", style: "cancel" },
         {
           text: "Salir",
