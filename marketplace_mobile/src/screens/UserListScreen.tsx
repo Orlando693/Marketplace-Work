@@ -1,7 +1,7 @@
 // src/screens/UserListScreen.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { View, Text, FlatList, Pressable, Alert, RefreshControl } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { getAllUsers, deleteUser, User } from "../services/userService";
 import { Loading, EmptyState } from "../components/ui";
 
@@ -10,24 +10,48 @@ export default function UserListScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Cargar usuarios al montar el componente
   useEffect(() => {
     loadUsers();
   }, []);
 
+  // Recargar usuarios cada vez que la pantalla recibe el foco
+  useFocusEffect(
+    useCallback(() => {
+      loadUsers();
+    }, [])
+  );
+
   const loadUsers = async () => {
     try {
       const res = await getAllUsers();
-      console.log("API Response:", res);
-      console.log("Users data:", res.data);
+      console.log("=== API Response ===");
+      console.log("Full response:", JSON.stringify(res.data, null, 2));
       
-      // El backend devuelve ApiResponse<List<UserResponse>>
-      // Verificar si res.data tiene la estructura { data: [...], message: "..." }
-      const usersArray = (res.data as any)?.data || res.data;
-      console.log("Users array:", usersArray);
+      // El backend devuelve ApiResponse con estructura:
+      // { success: true, message: "...", data: [...], timestamp: "..." }
+      const responseData = res.data as any;
       
-      setUsers(Array.isArray(usersArray) ? usersArray : []);
-    } catch (error) {
-      console.error("Error loading users:", error);
+      let usersArray: User[] = [];
+      
+      if (responseData && typeof responseData === 'object') {
+        // Si tiene el campo 'data', es un ApiResponse wrapper
+        if ('data' in responseData && Array.isArray(responseData.data)) {
+          usersArray = responseData.data;
+          console.log("✅ Extracted from ApiResponse.data:", usersArray.length, "users");
+        } 
+        // Si es directamente un array
+        else if (Array.isArray(responseData)) {
+          usersArray = responseData;
+          console.log("✅ Direct array response:", usersArray.length, "users");
+        }
+      }
+      
+      setUsers(usersArray);
+      console.log("📊 Users set in state:", usersArray.length);
+    } catch (error: any) {
+      console.error("❌ Error loading users:", error);
+      console.error("Error details:", error.response?.data || error.message);
       Alert.alert("Error", "Could not load users");
     } finally {
       setLoading(false);

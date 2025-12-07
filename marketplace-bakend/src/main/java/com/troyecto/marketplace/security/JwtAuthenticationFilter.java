@@ -30,6 +30,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        // No aplicar el filtro JWT a rutas públicas
+        return path.startsWith("/api/auth/") || 
+               path.equals("/api/users");
+    }
+
+    @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -48,6 +56,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 🧾 Extraer el token JWT (sin la palabra "Bearer ")
         jwt = authHeader.substring(7);
+        
+        // Si el token está vacío, continuar sin autenticar
+        if (jwt.trim().isEmpty()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
 // 👤 Extraer usuario desde el token, manejando expiración / token inválido;
         try {
@@ -56,13 +70,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Token expirado -> devolvemos 401 para que el cliente actúe (refresh / logout)
             System.out.println("JWT expirado: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("JWT expired");
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"JWT expired\",\"message\":\"Token has expired\"}");
             return;
         } catch (io.jsonwebtoken.JwtException e) {
             // Token mal formado, firma inválida, etc.
             System.out.println("JWT inválido: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Invalid JWT");
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"Invalid JWT\",\"message\":\"" + e.getMessage() + "\"}");
             return;
         }
 

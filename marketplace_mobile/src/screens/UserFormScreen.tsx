@@ -100,21 +100,34 @@ export default function UserFormScreen() {
       };
 
       if (isEditing) {
-        await updateUser(userId!, payload);
+        const response = await updateUser(userId!, payload);
+        console.log("✅ User updated:", response.data);
         Alert.alert("Success", "User updated successfully");
       } else {
-        await addUser(payload);
-        Alert.alert("Success", "User created successfully");
+        const response = await addUser(payload);
+        console.log("✅ User created:", response.data);
+        Alert.alert("Success", "User created successfully", [
+          {
+            text: "OK",
+            onPress: () => router.back()
+          }
+        ]);
+        return; // No hacer router.back() automáticamente
       }
 
       router.back();
     } catch (error: any) {
-      console.error(error);
-      Alert.alert(
-        "Error",
-        error?.response?.data?.message ||
-          "Could not save user. Please verify the data."
-      );
+      console.error("❌ Error saving user:", error);
+      console.error("Error response:", error?.response?.data);
+      console.error("Error message:", error?.message);
+      
+      const errorMessage = 
+        error?.response?.data?.message || 
+        error?.response?.data?.error ||
+        error?.message ||
+        "Could not save user. Please verify the data.";
+      
+      Alert.alert("Error", errorMessage);
     } finally {
       setSubmitting(false);
     }

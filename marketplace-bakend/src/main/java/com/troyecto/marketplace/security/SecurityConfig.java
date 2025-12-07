@@ -36,12 +36,17 @@ public class SecurityConfig {
                 // ✅ Definir rutas públicas y protegidas
 
                 .authorizeHttpRequests(auth -> auth
+                        // Rutas de autenticación públicas
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/register",
                                 "/api/auth/refresh"
                         ).permitAll()
+                        // Permitir crear y listar usuarios sin autenticación
+                        .requestMatchers("/api/users").permitAll()
+                        // Requiere autenticación para ver perfil
                         .requestMatchers("/api/auth/me").authenticated()
+                        // Todas las demás rutas requieren autenticación
                         .anyRequest().authenticated()
                 )
 
