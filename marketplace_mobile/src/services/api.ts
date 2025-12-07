@@ -9,14 +9,14 @@ const getBaseURL = () => {
     // En web, usar localhost
     return "http://localhost:8080/api";
   } else if (Platform.OS === "android") {
-    // En Android emulador
-    return "http://10.0.2.2:8080/api";
+    // En Android - usar IP de tu PC en la red local
+    return "http://192.168.0.15:8080/api";
   } else if (Platform.OS === "ios") {
     // En iOS emulador
     return "http://localhost:8080/api";
   }
   // Celular físico: cambiar por IP de tu PC
-  return "http://192.168.1.100:8080/api";
+  return "http://192.168.0.15:8080/api";
 };
 
 export const api = axios.create({
