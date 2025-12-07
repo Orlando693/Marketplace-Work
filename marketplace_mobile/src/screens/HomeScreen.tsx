@@ -75,7 +75,7 @@ export default function HomeScreen() {
 
           {/* OrderItems */}
           <Pressable
-            onPress={() => Alert.alert("OrderItems", "Module coming soon")}
+            onPress={() => router.push("/order-item-list")}
             className="flex-1 min-w-[45%] bg-white rounded-2xl p-5 items-center shadow-lg border-2 border-success-500 active:scale-95"
           >
             <Ionicons name="cube-outline" size={40} color="#22c55e" />
@@ -89,7 +89,7 @@ export default function HomeScreen() {
 
           {/* Reviews */}
           <Pressable
-            onPress={() => Alert.alert("Reviews", "Module coming soon")}
+            onPress={() => router.push("/review-list")}
             className="flex-1 min-w-[45%] bg-white rounded-2xl p-5 items-center shadow-lg border-2 border-blue-400 active:scale-95"
           >
             <Ionicons name="document-text-outline" size={40} color="#60a5fa" />
