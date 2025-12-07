@@ -11,7 +11,8 @@ import {
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { addStore, getStore, updateStore } from "../services/storeService";
-import { Input, Button, Loading, Select } from "../components/ui";
+import { getAllUsers, User } from "../services/userService";
+import { Input, Button, Loading, Select, SearchableSelect } from "../components/ui";
 
 export default function StoreFormScreen() {
   const params = useLocalSearchParams();
@@ -20,12 +21,14 @@ export default function StoreFormScreen() {
 
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [isActive, setIsActive] = useState(true);
-  const [userId, setUserId] = useState("");
+  const [userId, setUserId] = useState<number | string>("");
+  const [selectedUserName, setSelectedUserName] = useState("");
 
   const [errors, setErrors] = useState({
     name: "",
@@ -35,24 +38,36 @@ export default function StoreFormScreen() {
   });
 
   const categories = [
-    { label: "-- Select Category --", value: "" },
-    { label: "Electronics", value: "Electronics" },
-    { label: "Clothing", value: "Clothing" },
-    { label: "Books", value: "Books" },
-    { label: "Food", value: "Food" },
-    { label: "Furniture", value: "Furniture" },
-    { label: "Toys", value: "Toys" },
-    { label: "Sports", value: "Sports" },
-    { label: "Beauty", value: "Beauty" },
-    { label: "Health", value: "Health" },
+    { label: "-- Seleccionar Categoría --", value: "" },
+    { label: "Electrónica", value: "Electronics" },
+    { label: "Ropa", value: "Clothing" },
+    { label: "Libros", value: "Books" },
+    { label: "Comida", value: "Food" },
+    { label: "Muebles", value: "Furniture" },
+    { label: "Juguetes", value: "Toys" },
+    { label: "Deportes", value: "Sports" },
+    { label: "Belleza", value: "Beauty" },
+    { label: "Salud", value: "Health" },
   ];
 
   useEffect(() => {
+    loadUsers();
     if (isEditing) {
       fetchStore();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeId]);
+
+  const loadUsers = async () => {
+    try {
+      const res = await getAllUsers();
+      const usersArray = (res.data as any)?.data || res.data;
+      setUsers(Array.isArray(usersArray) ? usersArray : []);
+    } catch (error) {
+      console.error("Error loading users:", error);
+      Alert.alert("Error", "No se pudieron cargar los usuarios");
+    }
+  };
 
   const fetchStore = async () => {
     setLoading(true);
@@ -63,9 +78,15 @@ export default function StoreFormScreen() {
       setDescription(store.description);
       setCategory(store.category);
       setIsActive(store.isActive);
-      setUserId(store.userId.toString());
+      setUserId(store.userId);
+      
+      // Find and set selected user name
+      const user = users.find(u => u.id === store.userId);
+      if (user) {
+        setSelectedUserName(`${user.firstName} ${user.lastName}`);
+      }
     } catch {
-      Alert.alert("Error", "Could not load store");
+      Alert.alert("Error", "No se pudo cargar la tienda");
       router.back();
     } finally {
       setLoading(false);
@@ -81,16 +102,16 @@ export default function StoreFormScreen() {
     };
 
     if (!name.trim()) {
-      newErrors.name = "Store name is required";
+      newErrors.name = "El nombre de la tienda es requerido";
     }
     if (!description.trim()) {
-      newErrors.description = "Description is required";
+      newErrors.description = "La descripción es requerida";
     }
     if (!category.trim()) {
-      newErrors.category = "Category is required";
+      newErrors.category = "La categoría es requerida";
     }
     if (!userId.trim() || isNaN(Number(userId)) || Number(userId) <= 0) {
-      newErrors.userId = "User ID is required";
+      newErrors.userId = "El propietario es requerido";
     }
 
     setErrors(newErrors);
@@ -112,10 +133,10 @@ export default function StoreFormScreen() {
 
       if (isEditing) {
         await updateStore(storeId!, payload);
-        Alert.alert("Success", "Store updated successfully");
+        Alert.alert("Éxito", "Tienda actualizada exitosamente");
       } else {
         await addStore(payload);
-        Alert.alert("Success", "Store created successfully");
+        Alert.alert("Éxito", "Tienda creada exitosamente");
       }
 
       router.back();
@@ -124,7 +145,7 @@ export default function StoreFormScreen() {
       Alert.alert(
         "Error",
         error?.response?.data?.message ||
-          "Could not save store. Please verify the data."
+          "No se pudo guardar la tienda. Por favor verifica los datos."
       );
     } finally {
       setSubmitting(false);
@@ -146,7 +167,7 @@ export default function StoreFormScreen() {
     return icons[cat] || "🏪";
   };
 
-  if (loading) return <Loading text="Loading store..." />;
+  if (loading) return <Loading text="Cargando tienda..." />;
 
   return (
     <KeyboardAvoidingView
@@ -162,12 +183,12 @@ export default function StoreFormScreen() {
         {/* Header */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-slate-800">
-            {isEditing ? "Edit Store" : "New Store"}
+            {isEditing ? "Editar Tienda" : "Nueva Tienda"}
           </Text>
           <Text className="text-slate-600 mt-1">
             {isEditing 
-              ? "Modify store information" 
-              : "Enter new store information"}
+              ? "Modificar información de la tienda" 
+              : "Ingresar información de la nueva tienda"}
           </Text>
         </View>
 
@@ -176,13 +197,13 @@ export default function StoreFormScreen() {
           {/* Basic Info Section */}
           <View className="mb-4">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              🏪 Store Information
+              🏪 Información de la Tienda
             </Text>
           </View>
 
           <Input
-            label="Store Name"
-            placeholder="e.g., Tech Paradise"
+            label="Nombre de la Tienda"
+            placeholder="ej., Paraíso Tecnológico"
             value={name}
             onChangeText={(text) => {
               setName(text);
@@ -192,8 +213,8 @@ export default function StoreFormScreen() {
           />
 
           <Input
-            label="Description"
-            placeholder="Describe your store..."
+            label="Descripción"
+            placeholder="Describe tu tienda..."
             value={description}
             onChangeText={(text) => {
               setDescription(text);
@@ -206,7 +227,7 @@ export default function StoreFormScreen() {
           />
 
           <Select
-            label="Category"
+            label="Categoría"
             value={category}
             onValueChange={(value) => {
               setCategory(value);
@@ -221,7 +242,7 @@ export default function StoreFormScreen() {
             <View className="bg-slate-100 p-3 rounded-lg mb-4 flex-row items-center gap-2">
               <Text className="text-2xl">{getCategoryIcon(category)}</Text>
               <Text className="text-slate-700 font-semibold">
-                Category: {category}
+                Categoría: {category}
               </Text>
             </View>
           )}
@@ -229,18 +250,18 @@ export default function StoreFormScreen() {
           {/* Status Section */}
           <View className="mb-6 mt-4">
             <Text className="text-lg font-bold text-slate-700 mb-3">
-              📊 Store Status
+              📊 Estado de la Tienda
             </Text>
             <View className="bg-slate-50 p-4 rounded-lg border border-slate-200">
               <View className="flex-row justify-between items-center">
                 <View className="flex-1">
                   <Text className="text-slate-800 font-semibold mb-1">
-                    Store Active
+                    Tienda Activa
                   </Text>
                   <Text className="text-slate-600 text-sm">
                     {isActive 
-                      ? "Store is currently open for business" 
-                      : "Store is temporarily closed"}
+                      ? "La tienda está abierta al público" 
+                      : "La tienda está temporalmente cerrada"}
                   </Text>
                 </View>
                 <Switch
@@ -253,29 +274,35 @@ export default function StoreFormScreen() {
             </View>
           </View>
 
-          {/* User ID Section */}
+          {/* Owner Section */}
           <View className="mb-4">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              👤 Owner Information
+              👤 Información del Propietario
             </Text>
           </View>
 
-          <Input
-            label="User ID (Store Owner)"
-            placeholder="e.g., 1"
+          <SearchableSelect
+            label="Propietario de la Tienda"
             value={userId}
-            onChangeText={(text) => {
-              setUserId(text);
+            onSelect={(id, label) => {
+              setUserId(id);
+              setSelectedUserName(label);
               setErrors({ ...errors, userId: "" });
             }}
+            options={users.map(user => ({
+              id: user.id,
+              label: `${user.firstName} ${user.lastName}`,
+              subtitle: `${user.email} • ${user.phone}`,
+            }))}
+            placeholder="Seleccionar propietario"
             error={errors.userId}
-            keyboardType="number-pad"
+            icon="person-outline"
           />
 
           {/* Preview Card */}
           {name && category && (
             <View className="bg-gradient-to-r from-slate-100 to-slate-50 p-4 rounded-lg border border-slate-300 mt-4">
-              <Text className="text-slate-700 font-semibold mb-2">Preview:</Text>
+              <Text className="text-slate-700 font-semibold mb-2">Vista Previa:</Text>
               <View className="flex-row items-center gap-2 mb-2">
                 <Text className="text-3xl">{getCategoryIcon(category)}</Text>
                 <View className="flex-1">
@@ -292,7 +319,7 @@ export default function StoreFormScreen() {
                   }`}
                 >
                   <Text className="text-white text-xs font-bold">
-                    {isActive ? "OPEN" : "CLOSED"}
+                    {isActive ? "ABIERTA" : "CERRADA"}
                   </Text>
                 </View>
               </View>
@@ -307,7 +334,7 @@ export default function StoreFormScreen() {
           <View className="flex-row gap-3 mt-6 mb-6">
             <View className="flex-1">
               <Button
-                title="Cancel"
+                title="Cancelar"
                 variant="outline"
                 onPress={() => router.back()}
                 disabled={submitting}
@@ -315,7 +342,7 @@ export default function StoreFormScreen() {
             </View>
             <View className="flex-1">
               <Button
-                title={isEditing ? "Update" : "Create"}
+                title={isEditing ? "Actualizar" : "Crear"}
                 onPress={handleSubmit}
                 loading={submitting}
                 disabled={submitting}

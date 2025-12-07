@@ -11,7 +11,9 @@ import {
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { addReview, getReview, updateReview } from "../services/reviewService";
-import { Input, Button, Loading } from "../components/ui";
+import { getAllUsers, User } from "../services/userService";
+import { getAllProducts, Product } from "../services/productService";
+import { Input, Button, Loading, SearchableSelect } from "../components/ui";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function ReviewFormScreen() {
@@ -21,11 +23,15 @@ export default function ReviewFormScreen() {
 
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [userId, setUserId] = useState("");
-  const [productId, setProductId] = useState("");
+  const [userId, setUserId] = useState<number | string>("");
+  const [productId, setProductId] = useState<number | string>("");
+  const [userName, setUserName] = useState("");
+  const [productName, setProductName] = useState("");
 
   const [errors, setErrors] = useState({
     rating: "",
@@ -35,11 +41,35 @@ export default function ReviewFormScreen() {
   });
 
   useEffect(() => {
+    loadUsers();
+    loadProducts();
     if (isEditing) {
       fetchReview();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reviewId]);
+
+  const loadUsers = async () => {
+    try {
+      const res = await getAllUsers();
+      const usersArray = (res.data as any)?.data || res.data;
+      setUsers(Array.isArray(usersArray) ? usersArray : []);
+    } catch (error) {
+      console.error("Error loading users:", error);
+      Alert.alert("Error", "No se pudieron cargar los usuarios");
+    }
+  };
+
+  const loadProducts = async () => {
+    try {
+      const res = await getAllProducts();
+      const productsArray = (res.data as any)?.data || res.data;
+      setProducts(Array.isArray(productsArray) ? productsArray : []);
+    } catch (error) {
+      console.error("Error loading products:", error);
+      Alert.alert("Error", "No se pudieron cargar los productos");
+    }
+  };
 
   const fetchReview = async () => {
     setLoading(true);
@@ -50,8 +80,19 @@ export default function ReviewFormScreen() {
       setComment(review.comment);
       setUserId(review.userId.toString());
       setProductId(review.productId.toString());
+      
+      // Set user and product names from loaded arrays
+      const selectedUser = users.find((u) => u.id === review.userId);
+      if (selectedUser) {
+        setUserName(`${selectedUser.firstName} ${selectedUser.lastName}`);
+      }
+      
+      const selectedProduct = products.find((p) => p.id === review.productId);
+      if (selectedProduct) {
+        setProductName(selectedProduct.name);
+      }
     } catch {
-      Alert.alert("Error", "Could not load review");
+      Alert.alert("Error", "No se pudo cargar la reseña");
       router.back();
     } finally {
       setLoading(false);
@@ -67,18 +108,18 @@ export default function ReviewFormScreen() {
     };
 
     if (rating === 0) {
-      newErrors.rating = "Please select a rating";
+      newErrors.rating = "Por favor selecciona una calificación";
     }
     if (!comment.trim()) {
-      newErrors.comment = "Comment is required";
+      newErrors.comment = "El comentario es requerido";
     } else if (comment.trim().length > 250) {
-      newErrors.comment = "Comment cannot exceed 250 characters";
+      newErrors.comment = "El comentario no puede exceder 250 caracteres";
     }
-    if (!userId.trim() || isNaN(Number(userId)) || Number(userId) <= 0) {
-      newErrors.userId = "User ID is required";
+    if (!userId.toString().trim() || isNaN(Number(userId)) || Number(userId) <= 0) {
+      newErrors.userId = "El usuario es requerido";
     }
-    if (!productId.trim() || isNaN(Number(productId)) || Number(productId) <= 0) {
-      newErrors.productId = "Product ID is required";
+    if (!productId.toString().trim() || isNaN(Number(productId)) || Number(productId) <= 0) {
+      newErrors.productId = "El producto es requerido";
     }
 
     setErrors(newErrors);
@@ -99,10 +140,10 @@ export default function ReviewFormScreen() {
 
       if (isEditing) {
         await updateReview(reviewId!, payload);
-        Alert.alert("Success", "Review updated successfully");
+        Alert.alert("Éxito", "Reseña actualizada exitosamente");
       } else {
         await addReview(payload);
-        Alert.alert("Success", "Review created successfully");
+        Alert.alert("Éxito", "Reseña creada exitosamente");
       }
 
       router.back();
@@ -111,7 +152,7 @@ export default function ReviewFormScreen() {
       Alert.alert(
         "Error",
         error?.response?.data?.message ||
-          "Could not save review. Please verify the data."
+          "No se pudo guardar la reseña. Por favor verifica los datos."
       );
     } finally {
       setSubmitting(false);
@@ -121,7 +162,7 @@ export default function ReviewFormScreen() {
   const renderStarSelector = () => {
     return (
       <View>
-        <Text className="text-slate-700 font-semibold mb-2">Rating *</Text>
+        <Text className="text-slate-700 font-semibold mb-2">Calificación *</Text>
         <View className="flex-row gap-2 mb-2">
           {[1, 2, 3, 4, 5].map((star) => (
             <Pressable
@@ -142,7 +183,7 @@ export default function ReviewFormScreen() {
         </View>
         {rating > 0 && (
           <Text className="text-slate-600 text-sm mb-2">
-            Selected: {rating} {rating === 1 ? "star" : "stars"}
+            Seleccionado: {rating} {rating === 1 ? "estrella" : "estrellas"}
           </Text>
         )}
         {errors.rating && (
@@ -152,7 +193,7 @@ export default function ReviewFormScreen() {
     );
   };
 
-  if (loading) return <Loading text="Loading review..." />;
+  if (loading) return <Loading text="Cargando reseña..." />;
 
   return (
     <KeyboardAvoidingView
@@ -168,12 +209,12 @@ export default function ReviewFormScreen() {
         {/* Header */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-slate-800">
-            {isEditing ? "Edit Review" : "New Review"}
+            {isEditing ? "Editar Reseña" : "Nueva Reseña"}
           </Text>
           <Text className="text-slate-600 mt-1">
             {isEditing 
-              ? "Modify review information" 
-              : "Enter new review information"}
+              ? "Modificar información de la reseña" 
+              : "Ingresar información de la nueva reseña"}
           </Text>
         </View>
 
@@ -182,7 +223,7 @@ export default function ReviewFormScreen() {
           {/* Rating Section */}
           <View className="mb-6">
             <Text className="text-lg font-bold text-slate-700 mb-4">
-              ⭐ Rating
+              ⭐ Calificación
             </Text>
             {renderStarSelector()}
           </View>
@@ -190,11 +231,11 @@ export default function ReviewFormScreen() {
           {/* Comment Section */}
           <View className="mb-6">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              💬 Comment
+              💬 Comentario
             </Text>
             <Input
-              label="Your Review"
-              placeholder="Share your experience with this product..."
+              label="Tu Reseña"
+              placeholder="Comparte tu experiencia con este producto..."
               value={comment}
               onChangeText={(text) => {
                 setComment(text);
@@ -206,45 +247,70 @@ export default function ReviewFormScreen() {
               style={{ height: 120, textAlignVertical: "top" }}
             />
             <Text className="text-slate-500 text-xs mt-1 text-right">
-              {comment.length}/250 characters
+              {comment.length}/250 caracteres
             </Text>
           </View>
 
-          {/* IDs Section */}
+          {/* User Selection */}
           <View className="mb-4">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              🔗 References
+              👤 Información del Usuario
             </Text>
           </View>
 
-          <Input
-            label="User ID"
-            placeholder="e.g., 1"
+          <SearchableSelect
+            label="Usuario"
             value={userId}
-            onChangeText={(text) => {
-              setUserId(text);
+            onSelect={(id) => {
+              setUserId(id);
+              const selectedUser = users.find((u) => u.id === Number(id));
+              if (selectedUser) {
+                setUserName(`${selectedUser.firstName} ${selectedUser.lastName}`);
+              }
               setErrors({ ...errors, userId: "" });
             }}
+            options={users.map((user) => ({
+              id: user.id.toString(),
+              label: `${user.firstName} ${user.lastName}`,
+              subtitle: `${user.email} • ${user.phoneNumber}`,
+            }))}
+            placeholder={userName || "Seleccionar usuario"}
             error={errors.userId}
-            keyboardType="number-pad"
+            icon="person-outline"
           />
 
-          <Input
-            label="Product ID"
-            placeholder="e.g., 5"
+          {/* Product Selection */}
+          <View className="mb-4 mt-6">
+            <Text className="text-lg font-bold text-slate-700 mb-2">
+              📦 Información del Producto
+            </Text>
+          </View>
+
+          <SearchableSelect
+            label="Producto"
             value={productId}
-            onChangeText={(text) => {
-              setProductId(text);
+            onSelect={(id) => {
+              setProductId(id);
+              const selectedProduct = products.find((p) => p.id === Number(id));
+              if (selectedProduct) {
+                setProductName(selectedProduct.name);
+              }
               setErrors({ ...errors, productId: "" });
             }}
+            options={products.map((product) => ({
+              id: product.id.toString(),
+              label: product.name,
+              subtitle: `$${product.price} • ${product.storeName || "Tienda Desconocida"}`,
+            }))}
+            placeholder={productName || "Seleccionar producto"}
             error={errors.productId}
-            keyboardType="number-pad"
+            icon="cube-outline"
           />
 
           {/* Preview */}
           {rating > 0 && comment.trim() && (
             <View className="bg-blue-50 p-4 rounded-lg border border-blue-200 mt-4">
-              <Text className="text-blue-900 font-semibold mb-2">Preview:</Text>
+              <Text className="text-blue-900 font-semibold mb-2">Vista Previa:</Text>
               <View className="flex-row mb-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Ionicons
@@ -264,7 +330,7 @@ export default function ReviewFormScreen() {
           <View className="flex-row gap-3 mt-6 mb-6">
             <View className="flex-1">
               <Button
-                title="Cancel"
+                title="Cancelar"
                 variant="outline"
                 onPress={() => router.back()}
                 disabled={submitting}
@@ -272,7 +338,7 @@ export default function ReviewFormScreen() {
             </View>
             <View className="flex-1">
               <Button
-                title={isEditing ? "Update" : "Create"}
+                title={isEditing ? "Actualizar" : "Crear"}
                 onPress={handleSubmit}
                 loading={submitting}
                 disabled={submitting}

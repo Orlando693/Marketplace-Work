@@ -5,3 +5,4 @@ export { default as Input } from "./Input";
 export { default as Loading } from "./Loading";
 export { default as EmptyState } from "./EmptyState";
 export { default as Select } from "./Select";
+export { default as SearchableSelect } from "./SearchableSelect";

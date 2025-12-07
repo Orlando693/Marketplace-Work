@@ -12,7 +12,9 @@ import {
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { addOrderItem, getOrderItem, updateOrderItem } from "../services/orderItemService";
-import { Input, Button, Loading } from "../components/ui";
+import { getAllOrders, Order } from "../services/orderService";
+import { getAllProducts, Product } from "../services/productService";
+import { Input, Button, Loading, SearchableSelect } from "../components/ui";
 
 export default function OrderItemFormScreen() {
   const params = useLocalSearchParams();
@@ -21,13 +23,16 @@ export default function OrderItemFormScreen() {
 
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
 
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
   const [subtotal, setSubtotal] = useState("");
-  const [orderId, setOrderId] = useState("");
-  const [productId, setProductId] = useState("");
+  const [orderId, setOrderId] = useState<number | string>("");
+  const [productId, setProductId] = useState<number | string>("");
   const [productName, setProductName] = useState("");
+  const [orderInfo, setOrderInfo] = useState("");
 
   const [errors, setErrors] = useState({
     quantity: "",
@@ -35,15 +40,38 @@ export default function OrderItemFormScreen() {
     subtotal: "",
     orderId: "",
     productId: "",
-    productName: "",
   });
 
   useEffect(() => {
+    loadOrders();
+    loadProducts();
     if (isEditing) {
       fetchOrderItem();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderItemId]);
+
+  const loadOrders = async () => {
+    try {
+      const res = await getAllOrders();
+      const ordersArray = (res.data as any)?.data || res.data;
+      setOrders(Array.isArray(ordersArray) ? ordersArray : []);
+    } catch (error) {
+      console.error("Error loading orders:", error);
+      Alert.alert("Error", "No se pudieron cargar las órdenes");
+    }
+  };
+
+  const loadProducts = async () => {
+    try {
+      const res = await getAllProducts();
+      const productsArray = (res.data as any)?.data || res.data;
+      setProducts(Array.isArray(productsArray) ? productsArray : []);
+    } catch (error) {
+      console.error("Error loading products:", error);
+      Alert.alert("Error", "No se pudieron cargar los productos");
+    }
+  };
 
   // Auto-calculate subtotal when quantity or price changes
   useEffect(() => {
@@ -67,9 +95,19 @@ export default function OrderItemFormScreen() {
       setSubtotal(item.subtotal.toString());
       setOrderId(item.orderId.toString());
       setProductId(item.productId.toString());
-      setProductName(item.productName || "");
+      
+      // Set order and product info from loaded arrays
+      const selectedOrder = orders.find((o) => o.id === item.orderId);
+      if (selectedOrder) {
+        setOrderInfo(`Order #${selectedOrder.id} - $${selectedOrder.totalAmount}`);
+      }
+      
+      const selectedProduct = products.find((p) => p.id === item.productId);
+      if (selectedProduct) {
+        setProductName(selectedProduct.name);
+      }
     } catch {
-      Alert.alert("Error", "Could not load order item");
+      Alert.alert("Error", "No se pudo cargar el ítem de la orden");
       router.back();
     } finally {
       setLoading(false);
@@ -83,26 +121,22 @@ export default function OrderItemFormScreen() {
       subtotal: "",
       orderId: "",
       productId: "",
-      productName: "",
     };
 
     if (!quantity.trim() || isNaN(Number(quantity)) || Number(quantity) <= 0) {
-      newErrors.quantity = "Quantity must be a positive number";
+      newErrors.quantity = "La cantidad debe ser un número positivo";
     }
     if (!price.trim() || isNaN(Number(price)) || Number(price) <= 0) {
-      newErrors.price = "Price must be a positive number";
+      newErrors.price = "El precio debe ser un número positivo";
     }
     if (!subtotal.trim() || isNaN(Number(subtotal)) || Number(subtotal) <= 0) {
-      newErrors.subtotal = "Subtotal must be a positive number";
+      newErrors.subtotal = "El subtotal debe ser un número positivo";
     }
-    if (!orderId.trim() || isNaN(Number(orderId)) || Number(orderId) <= 0) {
-      newErrors.orderId = "Order ID is required";
+    if (!orderId.toString().trim() || isNaN(Number(orderId)) || Number(orderId) <= 0) {
+      newErrors.orderId = "La orden es requerida";
     }
-    if (!productId.trim() || isNaN(Number(productId)) || Number(productId) <= 0) {
-      newErrors.productId = "Product ID is required";
-    }
-    if (!productName.trim()) {
-      newErrors.productName = "Product name is required";
+    if (!productId.toString().trim() || isNaN(Number(productId)) || Number(productId) <= 0) {
+      newErrors.productId = "El producto es requerido";
     }
 
     setErrors(newErrors);
@@ -125,10 +159,10 @@ export default function OrderItemFormScreen() {
 
       if (isEditing) {
         await updateOrderItem(orderItemId!, payload);
-        Alert.alert("Success", "Order item updated successfully");
+        Alert.alert("Éxito", "Ítem de orden actualizado exitosamente");
       } else {
         await addOrderItem(payload);
-        Alert.alert("Success", "Order item created successfully");
+        Alert.alert("Éxito", "Ítem de orden creado exitosamente");
       }
 
       router.back();
@@ -137,14 +171,14 @@ export default function OrderItemFormScreen() {
       Alert.alert(
         "Error",
         error?.response?.data?.message ||
-          "Could not save order item. Please verify the data."
+          "No se pudo guardar el ítem de la orden. Por favor verifica los datos."
       );
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) return <Loading text="Loading order item..." />;
+  if (loading) return <Loading text="Cargando ítem de orden..." />;
 
   return (
     <KeyboardAvoidingView
@@ -163,12 +197,12 @@ export default function OrderItemFormScreen() {
           </Pressable>
           <View>
             <Text className="text-2xl font-bold text-slate-800">
-              {isEditing ? "Edit Order Item" : "New Order Item"}
+              {isEditing ? "Editar Ítem de Orden" : "Nuevo Ítem de Orden"}
             </Text>
             <Text className="text-slate-600 mt-0.5">
               {isEditing 
-                ? "Modify order item information" 
-                : "Enter new order item information"}
+                ? "Modificar información del ítem de orden" 
+                : "Ingresar información del nuevo ítem de orden"}
             </Text>
           </View>
         </View>
@@ -182,58 +216,74 @@ export default function OrderItemFormScreen() {
 
         {/* Card contenedor */}
         <View className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">
-          {/* Product Info Section */}
+          {/* Order Info Section */}
           <View className="mb-4">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              📦 Product Information
+              🛒 Selección de Orden
             </Text>
           </View>
 
-          <Input
-            label="Product ID"
-            placeholder="e.g., 1"
-            value={productId}
-            onChangeText={(text) => {
-              setProductId(text);
-              setErrors({ ...errors, productId: "" });
-            }}
-            error={errors.productId}
-            keyboardType="number-pad"
-          />
-
-          <Input
-            label="Product Name"
-            placeholder="e.g., Laptop HP"
-            value={productName}
-            onChangeText={(text) => {
-              setProductName(text);
-              setErrors({ ...errors, productName: "" });
-            }}
-            error={errors.productName}
-          />
-
-          {/* Order Info Section */}
-          <View className="mb-4 mt-6">
-            <Text className="text-lg font-bold text-slate-700 mb-2">
-              🛒 Order Details
-            </Text>
-          </View>
-
-          <Input
-            label="Order ID"
-            placeholder="e.g., 5"
+          <SearchableSelect
+            label="Orden"
             value={orderId}
-            onChangeText={(text) => {
-              setOrderId(text);
+            onSelect={(id) => {
+              setOrderId(id);
+              const selectedOrder = orders.find((o) => o.id === Number(id));
+              if (selectedOrder) {
+                setOrderInfo(`Orden #${selectedOrder.id} - $${selectedOrder.totalAmount}`);
+              }
               setErrors({ ...errors, orderId: "" });
             }}
+            options={orders.map((order) => ({
+              id: order.id.toString(),
+              label: `Orden #${order.id}`,
+              subtitle: `Total: $${order.totalAmount} • ${order.paymentStatus}`,
+            }))}
+            placeholder={orderInfo || "Seleccionar orden"}
             error={errors.orderId}
-            keyboardType="number-pad"
+            icon="cart-outline"
           />
 
+          {/* Product Info Section */}
+          <View className="mb-4 mt-6">
+            <Text className="text-lg font-bold text-slate-700 mb-2">
+              📦 Selección de Producto
+            </Text>
+          </View>
+
+          <SearchableSelect
+            label="Producto"
+            value={productId}
+            onSelect={(id) => {
+              setProductId(id);
+              const selectedProduct = products.find((p) => p.id === Number(id));
+              if (selectedProduct) {
+                setProductName(selectedProduct.name);
+                // Auto-fill price with product's price
+                setPrice(selectedProduct.price.toString());
+              }
+              setErrors({ ...errors, productId: "" });
+            }}
+            options={products.map((product) => ({
+              id: product.id.toString(),
+              label: product.name,
+              subtitle: `$${product.price} • Stock: ${product.stock}`,
+            }))}
+            placeholder={productName || "Seleccionar producto"}
+            error={errors.productId}
+            icon="cube-outline"
+          />
+
+          {/* Quantity and Pricing */}
+          <View className="mb-4 mt-6">
+            <Text className="text-lg font-bold text-slate-700 mb-2">
+              💰 Cantidad y Precios
+            </Text>
+          </View>
+
           <Input
-            label="Quantity"
-            placeholder="e.g., 2"
+            label="Cantidad"
+            placeholder="ej., 2"
             value={quantity}
             onChangeText={(text) => {
               setQuantity(text);
@@ -244,8 +294,8 @@ export default function OrderItemFormScreen() {
           />
 
           <Input
-            label="Price (per unit)"
-            placeholder="e.g., 999.99"
+            label="Precio (por unidad)"
+            placeholder="ej., 999.99"
             value={price}
             onChangeText={(text) => {
               setPrice(text);
@@ -256,7 +306,7 @@ export default function OrderItemFormScreen() {
           />
 
           <Input
-            label="Subtotal (auto-calculated)"
+            label="Subtotal (auto-calculado)"
             placeholder="0.00"
             value={subtotal}
             onChangeText={(text) => {
@@ -280,7 +330,7 @@ export default function OrderItemFormScreen() {
           <View className="flex-row gap-3 mt-6 mb-6">
             <View className="flex-1">
               <Button
-                title="Cancel"
+                title="Cancelar"
                 variant="outline"
                 onPress={() => router.back()}
                 disabled={submitting}
@@ -288,7 +338,7 @@ export default function OrderItemFormScreen() {
             </View>
             <View className="flex-1">
               <Button
-                title={isEditing ? "Update" : "Create"}
+                title={isEditing ? "Actualizar" : "Crear"}
                 onPress={handleSubmit}
                 loading={submitting}
                 disabled={submitting}

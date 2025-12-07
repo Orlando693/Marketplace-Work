@@ -11,7 +11,8 @@ import {
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { addProduct, getProduct, updateProduct } from "../services/productService";
-import { Input, Button, Loading } from "../components/ui";
+import { getAllStores, Store } from "../services/storeService";
+import { Input, Button, Loading, SearchableSelect } from "../components/ui";
 
 export default function ProductFormScreen() {
   const params = useLocalSearchParams();
@@ -20,13 +21,14 @@ export default function ProductFormScreen() {
 
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [stores, setStores] = useState<Store[]>([]);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
   const [isAvailable, setIsAvailable] = useState(true);
-  const [storeId, setStoreId] = useState("");
+  const [storeId, setStoreId] = useState<number | string>("");
   const [storeName, setStoreName] = useState("");
 
   const [errors, setErrors] = useState({
@@ -35,15 +37,26 @@ export default function ProductFormScreen() {
     price: "",
     stock: "",
     storeId: "",
-    storeName: "",
   });
 
   useEffect(() => {
+    loadStores();
     if (isEditing) {
       fetchProduct();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
+
+  const loadStores = async () => {
+    try {
+      const res = await getAllStores();
+      const storesArray = (res.data as any)?.data || res.data;
+      setStores(Array.isArray(storesArray) ? storesArray : []);
+    } catch (error) {
+      console.error("Error loading stores:", error);
+      Alert.alert("Error", "No se pudieron cargar las tiendas");
+    }
+  };
 
   const fetchProduct = async () => {
     setLoading(true);
@@ -56,9 +69,14 @@ export default function ProductFormScreen() {
       setStock(product.stock.toString());
       setIsAvailable(product.isAvailable);
       setStoreId(product.storeId.toString());
-      setStoreName(product.storeName || "");
+      
+      // Set store name from loaded stores
+      const selectedStore = stores.find((s) => s.id === product.storeId);
+      if (selectedStore) {
+        setStoreName(selectedStore.name);
+      }
     } catch {
-      Alert.alert("Error", "Could not load product");
+      Alert.alert("Error", "No se pudo cargar el producto");
       router.back();
     } finally {
       setLoading(false);
@@ -72,26 +90,22 @@ export default function ProductFormScreen() {
       price: "",
       stock: "",
       storeId: "",
-      storeName: "",
     };
 
     if (!name.trim()) {
-      newErrors.name = "Product name is required";
+      newErrors.name = "El nombre del producto es requerido";
     }
     if (!description.trim()) {
-      newErrors.description = "Description is required";
+      newErrors.description = "La descripción es requerida";
     }
     if (!price.trim() || isNaN(Number(price)) || Number(price) <= 0) {
-      newErrors.price = "Price must be a positive number";
+      newErrors.price = "El precio debe ser un número positivo";
     }
     if (!stock.trim() || isNaN(Number(stock)) || Number(stock) < 0) {
-      newErrors.stock = "Stock must be a valid number";
+      newErrors.stock = "El stock debe ser un número válido";
     }
-    if (!storeId.trim() || isNaN(Number(storeId)) || Number(storeId) <= 0) {
-      newErrors.storeId = "Store ID is required";
-    }
-    if (!storeName.trim()) {
-      newErrors.storeName = "Store name is required";
+    if (!storeId.toString().trim() || isNaN(Number(storeId)) || Number(storeId) <= 0) {
+      newErrors.storeId = "La tienda es requerida";
     }
 
     setErrors(newErrors);
@@ -115,10 +129,10 @@ export default function ProductFormScreen() {
 
       if (isEditing) {
         await updateProduct(productId!, payload);
-        Alert.alert("Success", "Product updated successfully");
+        Alert.alert("Éxito", "Producto actualizado exitosamente");
       } else {
         await addProduct(payload);
-        Alert.alert("Success", "Product created successfully");
+        Alert.alert("Éxito", "Producto creado exitosamente");
       }
 
       router.back();
@@ -127,7 +141,7 @@ export default function ProductFormScreen() {
       Alert.alert(
         "Error",
         error?.response?.data?.message ||
-          "Could not save product. Please verify the data."
+          "No se pudo guardar el producto. Por favor verifica los datos."
       );
     } finally {
       setSubmitting(false);
@@ -136,12 +150,12 @@ export default function ProductFormScreen() {
 
   const getStockStatus = () => {
     const stockNum = parseInt(stock || "0", 10);
-    if (stockNum === 0) return { label: "Out of Stock", color: "danger" };
-    if (stockNum < 10) return { label: "Low Stock", color: "warning" };
-    return { label: "In Stock", color: "success" };
+    if (stockNum === 0) return { label: "Sin Stock", color: "danger" };
+    if (stockNum < 10) return { label: "Stock Bajo", color: "warning" };
+    return { label: "En Stock", color: "success" };
   };
 
-  if (loading) return <Loading text="Loading product..." />;
+  if (loading) return <Loading text="Cargando producto..." />;
 
   return (
     <KeyboardAvoidingView
@@ -157,12 +171,12 @@ export default function ProductFormScreen() {
         {/* Header */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-slate-800">
-            {isEditing ? "Edit Product" : "New Product"}
+            {isEditing ? "Editar Producto" : "Nuevo Producto"}
           </Text>
           <Text className="text-slate-600 mt-1">
             {isEditing 
-              ? "Modify product information" 
-              : "Enter new product information"}
+              ? "Modificar información del producto" 
+              : "Ingresar información del nuevo producto"}
           </Text>
         </View>
 
@@ -171,12 +185,12 @@ export default function ProductFormScreen() {
           {/* Basic Info Section */}
           <View className="mb-4">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              📦 Product Information
+              📦 Informacion del Producto
             </Text>
           </View>
 
           <Input
-            label="Product Name"
+            label="Nombre del Producto"
             placeholder="e.g., iPhone 15 Pro"
             value={name}
             onChangeText={(text) => {
@@ -187,8 +201,8 @@ export default function ProductFormScreen() {
           />
 
           <Input
-            label="Description"
-            placeholder="Describe the product..."
+            label="Descripción"
+            placeholder="Describe el producto..."
             value={description}
             onChangeText={(text) => {
               setDescription(text);
@@ -203,14 +217,14 @@ export default function ProductFormScreen() {
           {/* Pricing Section */}
           <View className="mb-6 mt-4">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              💰 Pricing & Inventory
+              💰 Precio e Inventario
             </Text>
           </View>
 
           <View className="flex-row gap-3">
             <View className="flex-1">
               <Input
-                label="Price ($)"
+                label="Precio ($)"
                 placeholder="0.00"
                 value={price}
                 onChangeText={(text) => {
@@ -257,7 +271,7 @@ export default function ProductFormScreen() {
                       : "text-danger-700"
                   }`}
                 >
-                  {getStockStatus().label}: {stock} units
+                  {getStockStatus().label}: {stock} unidades
                 </Text>
               </View>
             </View>
@@ -266,18 +280,18 @@ export default function ProductFormScreen() {
           {/* Availability Switch */}
           <View className="mb-6">
             <Text className="text-lg font-bold text-slate-700 mb-3">
-              📊 Availability Status
+              📊 Estado de Disponibilidad
             </Text>
             <View className="bg-slate-50 p-4 rounded-lg border border-slate-200">
               <View className="flex-row justify-between items-center">
                 <View className="flex-1">
                   <Text className="text-slate-800 font-semibold mb-1">
-                    Available for Sale
+                    Disponible para Venta
                   </Text>
                   <Text className="text-slate-600 text-sm">
                     {isAvailable 
-                      ? "Product is available for customers" 
-                      : "Product is hidden from customers"}
+                      ? "El producto está disponible para clientes" 
+                      : "El producto está oculto para clientes"}
                   </Text>
                 </View>
                 <Switch
@@ -293,37 +307,35 @@ export default function ProductFormScreen() {
           {/* Store Info Section */}
           <View className="mb-4">
             <Text className="text-lg font-bold text-slate-700 mb-2">
-              🏪 Store Information
+              🏪 Informacion de la Tienda
             </Text>
           </View>
 
-          <Input
-            label="Store ID"
-            placeholder="e.g., 1"
+          <SearchableSelect
+            label="Tienda"
             value={storeId}
-            onChangeText={(text) => {
-              setStoreId(text);
+            onSelect={(id) => {
+              setStoreId(id);
+              const selectedStore = stores.find((s) => s.id === Number(id));
+              if (selectedStore) {
+                setStoreName(selectedStore.name);
+              }
               setErrors({ ...errors, storeId: "" });
             }}
+            options={stores.map((store) => ({
+              id: store.id.toString(),
+              label: store.name,
+              subtitle: `${store.category}${store.isActive ? " • Activa" : " • Inactiva"}`,
+            }))}
+            placeholder={storeName || "Seleccionar tienda"}
             error={errors.storeId}
-            keyboardType="number-pad"
-          />
-
-          <Input
-            label="Store Name"
-            placeholder="e.g., Tech Paradise"
-            value={storeName}
-            onChangeText={(text) => {
-              setStoreName(text);
-              setErrors({ ...errors, storeName: "" });
-            }}
-            error={errors.storeName}
+            icon="storefront-outline"
           />
 
           {/* Preview Card */}
           {name && price && (
             <View className="bg-gradient-to-r from-warning-50 to-amber-50 p-4 rounded-lg border border-warning-200 mt-4">
-              <Text className="text-slate-700 font-semibold mb-2">Preview:</Text>
+              <Text className="text-slate-700 font-semibold mb-2">Vista Previa:</Text>
               <View className="flex-row justify-between items-start">
                 <View className="flex-1">
                   <Text className="text-slate-900 font-bold text-lg mb-1">
@@ -358,7 +370,7 @@ export default function ProductFormScreen() {
                   }`}
                 >
                   <Text className="text-white text-xs font-bold">
-                    {isAvailable ? "AVAILABLE" : "UNAVAILABLE"}
+                    {isAvailable ? "DISPONIBLE" : "NO DISPONIBLE"}
                   </Text>
                 </View>
                 {stock && (
@@ -383,7 +395,7 @@ export default function ProductFormScreen() {
           <View className="flex-row gap-3 mt-6 mb-6">
             <View className="flex-1">
               <Button
-                title="Cancel"
+                title="Cancelar"
                 variant="outline"
                 onPress={() => router.back()}
                 disabled={submitting}
@@ -391,7 +403,7 @@ export default function ProductFormScreen() {
             </View>
             <View className="flex-1">
               <Button
-                title={isEditing ? "Update" : "Create"}
+                title={isEditing ? "Actualizar" : "Crear"}
                 onPress={handleSubmit}
                 loading={submitting}
                 disabled={submitting}

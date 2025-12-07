@@ -55,7 +55,7 @@ export default function UserFormScreen() {
       setAddress(user.address || "");
       setRole(user.role || "ROLE_USER");
     } catch {
-      Alert.alert("Error", "Could not load user");
+      Alert.alert("Error", "No se pudo cargar el usuario");
       router.back();
     } finally {
       setLoading(false);
@@ -72,14 +72,14 @@ export default function UserFormScreen() {
       role: "",
     };
 
-    if (!firstName.trim()) newErrors.firstName = "First name is required";
-    if (!lastName.trim()) newErrors.lastName = "Last name is required";
-    if (!email.trim()) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Invalid email format";
-    if (!phone.trim()) newErrors.phone = "Phone is required";
-    else if (!/^\d{8}$/.test(phone.trim())) newErrors.phone = "Phone must have exactly 8 digits";
-    if (!address.trim()) newErrors.address = "Address is required";
-    if (!role.trim()) newErrors.role = "Role is required";
+    if (!firstName.trim()) newErrors.firstName = "El nombre es requerido";
+    if (!lastName.trim()) newErrors.lastName = "El apellido es requerido";
+    if (!email.trim()) newErrors.email = "El correo electrónico es requerido";
+    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Formato de correo inválido";
+    if (!phone.trim()) newErrors.phone = "El teléfono es requerido";
+    else if (!/^\d{8}$/.test(phone.trim())) newErrors.phone = "El teléfono debe tener exactamente 8 dígitos";
+    if (!address.trim()) newErrors.address = "La dirección es requerida";
+    if (!role.trim()) newErrors.role = "El rol es requerido";
 
     setErrors(newErrors);
     return !Object.values(newErrors).some((error) => error);
@@ -102,11 +102,11 @@ export default function UserFormScreen() {
       if (isEditing) {
         const response = await updateUser(userId!, payload);
         console.log("✅ User updated:", response.data);
-        Alert.alert("Success", "User updated successfully");
+        Alert.alert("Éxito", "Usuario actualizado exitosamente");
       } else {
         const response = await addUser(payload);
         console.log("✅ User created:", response.data);
-        Alert.alert("Success", "User created successfully", [
+        Alert.alert("Éxito", "Usuario creado exitosamente", [
           {
             text: "OK",
             onPress: () => router.back()
@@ -125,7 +125,7 @@ export default function UserFormScreen() {
         error?.response?.data?.message || 
         error?.response?.data?.error ||
         error?.message ||
-        "Could not save user. Please verify the data.";
+        "No se pudo guardar el usuario. Por favor verifica los datos.";
       
       Alert.alert("Error", errorMessage);
     } finally {
@@ -133,7 +133,7 @@ export default function UserFormScreen() {
     }
   };
 
-  if (loading) return <Loading text="Loading user..." />;
+  if (loading) return <Loading text="Cargando usuario..." />;
 
   return (
     <KeyboardAvoidingView
@@ -149,18 +149,18 @@ export default function UserFormScreen() {
         {/* Header */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-slate-800">
-            {isEditing ? "Edit User" : "New User"}
+            {isEditing ? "Editar Usuario" : "Nuevo Usuario"}
           </Text>
           <Text className="text-slate-600 mt-1">
-            {isEditing ? "Modify user information" : "Enter new user information"}
+            {isEditing ? "Modificar información del usuario" : "Ingresar información del nuevo usuario"}
           </Text>
         </View>
 
         {/* Card contenedor */}
         <View className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">
           <Input
-            label="First Name"
-            placeholder="e.g., John"
+            label="Nombre"
+            placeholder="ej., Juan"
             value={firstName}
             onChangeText={(text) => {
               setFirstName(text);
@@ -170,8 +170,8 @@ export default function UserFormScreen() {
           />
 
           <Input
-            label="Last Name"
-            placeholder="e.g., Doe"
+            label="Apellido"
+            placeholder="ej., Pérez"
             value={lastName}
             onChangeText={(text) => {
               setLastName(text);
@@ -181,8 +181,8 @@ export default function UserFormScreen() {
           />
 
           <Input
-            label="Email"
-            placeholder="e.g., john@example.com"
+            label="Correo Electrónico"
+            placeholder="ej., juan@ejemplo.com"
             value={email}
             onChangeText={(text) => {
               setEmail(text);
@@ -194,8 +194,8 @@ export default function UserFormScreen() {
           />
 
           <Input
-            label="Phone (8 digits)"
-            placeholder="e.g., 12345678"
+            label="Teléfono (8 dígitos)"
+            placeholder="ej., 12345678"
             value={phone}
             onChangeText={(text) => {
               setPhone(text);
@@ -207,8 +207,8 @@ export default function UserFormScreen() {
           />
 
           <Input
-            label="Address"
-            placeholder="e.g., 123 Main St"
+            label="Dirección"
+            placeholder="ej., Calle Principal 123"
             value={address}
             onChangeText={(text) => {
               setAddress(text);
@@ -218,16 +218,16 @@ export default function UserFormScreen() {
           />
 
           <Select
-            label="Role"
+            label="Rol"
             value={role}
             onValueChange={(value) => {
               setRole(value);
               setErrors({ ...errors, role: "" });
             }}
             options={[
-              { label: "-- Select Role --", value: "" },
-              { label: "ADMIN", value: "ROLE_ADMIN" },
-              { label: "USER", value: "ROLE_USER" },
+              { label: "-- Seleccionar Rol --", value: "" },
+              { label: "ADMINISTRADOR", value: "ROLE_ADMIN" },
+              { label: "USUARIO", value: "ROLE_USER" },
             ]}
             error={errors.role}
           />
@@ -235,7 +235,7 @@ export default function UserFormScreen() {
           <View className="flex-row gap-3 mt-4 mb-6">
             <View className="flex-1">
               <Button
-                title="Cancel"
+                title="Cancelar"
                 variant="outline"
                 onPress={() => router.back()}
                 disabled={submitting}
@@ -243,7 +243,7 @@ export default function UserFormScreen() {
             </View>
             <View className="flex-1">
               <Button
-                title={isEditing ? "Update" : "Create"}
+                title={isEditing ? "Actualizar" : "Crear"}
                 onPress={handleSubmit}
                 loading={submitting}
                 disabled={submitting}

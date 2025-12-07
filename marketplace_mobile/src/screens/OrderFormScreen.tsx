@@ -56,7 +56,7 @@ const OrderFormScreen = () => {
       setUsers(Array.isArray(usersArray) ? usersArray : []);
     } catch (error) {
       console.error("Error loading users:", error);
-      Alert.alert("Error", "Could not load users");
+      Alert.alert("Error", "No se pudieron cargar los usuarios");
     }
   };
 
@@ -76,7 +76,7 @@ const OrderFormScreen = () => {
       });
     } catch (error) {
       console.error("Error loading order:", error);
-      Alert.alert("Error", "Could not load order");
+      Alert.alert("Error", "No se pudo cargar la orden");
       router.back();
     } finally {
       setLoading(false);
@@ -87,31 +87,31 @@ const OrderFormScreen = () => {
     const newErrors: Record<string, string> = {};
 
     if (formData.subtotal === undefined || formData.subtotal < 0) {
-      newErrors.subtotal = "Subtotal must be 0 or greater";
+      newErrors.subtotal = "El subtotal debe ser 0 o mayor";
     }
 
     if (formData.totalAmount === undefined || formData.totalAmount < 0) {
-      newErrors.totalAmount = "Total amount must be 0 or greater";
+      newErrors.totalAmount = "El monto total debe ser 0 o mayor";
     }
 
     if (formData.tax === undefined || formData.tax < 0) {
-      newErrors.tax = "Tax must be 0 or greater";
+      newErrors.tax = "El impuesto debe ser 0 o mayor";
     }
 
     if (!formData.currency) {
-      newErrors.currency = "Currency is required";
+      newErrors.currency = "La moneda es requerida";
     }
 
     if (!formData.payMethod) {
-      newErrors.payMethod = "Payment method is required";
+      newErrors.payMethod = "El método de pago es requerido";
     }
 
     if (!formData.paymentStatus) {
-      newErrors.paymentStatus = "Payment status is required";
+      newErrors.paymentStatus = "El estado de pago es requerido";
     }
 
     if (!formData.userId || formData.userId === 0) {
-      newErrors.userId = "User is required";
+      newErrors.userId = "El usuario es requerido";
     }
 
     setErrors(newErrors);
@@ -120,7 +120,7 @@ const OrderFormScreen = () => {
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      Alert.alert("Validation Error", "Please fill all required fields correctly");
+      Alert.alert("Error de Validación", "Por favor completa todos los campos requeridos correctamente");
       return;
     }
 
@@ -138,16 +138,16 @@ const OrderFormScreen = () => {
 
       if (isEditing) {
         await updateOrder(Number(id), payload);
-        Alert.alert("Success", "Order updated successfully");
+        Alert.alert("Éxito", "Orden actualizada exitosamente");
       } else {
         await addOrder(payload);
-        Alert.alert("Success", "Order created successfully");
+        Alert.alert("Éxito", "Orden creada exitosamente");
       }
       router.back();
     } catch (error: any) {
       console.error("Error saving order:", error);
       const errorMessage =
-        error.response?.data?.message || "Failed to save order";
+        error.response?.data?.message || "No se pudo guardar la orden";
       Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
@@ -159,9 +159,9 @@ const OrderFormScreen = () => {
   }
 
   const currencyOptions = [
-    { label: "Bolivianos", value: "Bs" },
-    { label: "Dolares Estadounidenses", value: "USD" },
-    { label: "Euros", value: "Eur" },
+    { label: "Bolivianos (Bs)", value: "Bs" },
+    { label: "Dólares Estadounidenses (USD)", value: "USD" },
+    { label: "Euros (EUR)", value: "Eur" },
   ];
 
   const paymentMethodOptions = [
@@ -171,9 +171,9 @@ const OrderFormScreen = () => {
   ];
 
   const paymentStatusOptions = [
-    { label: "Null", value: "" },
-    { label: "Completed", value: "Complete" },
-    { label: "Pending", value: "Pending" },
+    { label: "Ninguno", value: "" },
+    { label: "Completado", value: "Complete" },
+    { label: "Pendiente", value: "Pending" },
   ];
 
   const userOptions = users.map((user) => ({
@@ -196,10 +196,10 @@ const OrderFormScreen = () => {
             </Pressable>
             <View className="flex-1">
               <Text className="text-2xl font-bold text-slate-800">
-                {isEditing ? "Edit Order" : "Create Order"}
+                {isEditing ? "Editar Orden" : "Crear Orden"}
               </Text>
               <Text className="text-slate-500 text-sm mt-0.5">
-                {isEditing ? "Update order information" : "Fill in the order details"}
+                {isEditing ? "Actualizar información de la orden" : "Completar los detalles de la orden"}
               </Text>
             </View>
           </View>
@@ -227,7 +227,7 @@ const OrderFormScreen = () => {
 
           <View>
             <Input
-              label="Total Amount *"
+              label="Monto Total *"
               value={formData.totalAmount.toString()}
               onChangeText={(text) =>
                 setFormData({ ...formData, totalAmount: parseInt(text) || 0 })
@@ -240,7 +240,7 @@ const OrderFormScreen = () => {
 
           <View>
             <Input
-              label="Tax *"
+              label="Impuesto *"
               value={formData.tax.toString()}
               onChangeText={(text) =>
                 setFormData({ ...formData, tax: parseFloat(text) || 0 })
@@ -253,52 +253,52 @@ const OrderFormScreen = () => {
 
           <View>
             <Select
-              label="Currency"
+              label="Moneda"
               value={formData.currency}
               onValueChange={(value) =>
                 setFormData({ ...formData, currency: value })
               }
               options={currencyOptions}
-              placeholder="Select Currency"
+              placeholder="Seleccionar Moneda"
               error={errors.currency}
             />
           </View>
 
           <View>
             <Select
-              label="Payment Method"
+              label="Método de Pago"
               value={formData.payMethod}
               onValueChange={(value) =>
                 setFormData({ ...formData, payMethod: value })
               }
               options={paymentMethodOptions}
-              placeholder="Select Payment Method"
+              placeholder="Seleccionar Método de Pago"
               error={errors.payMethod}
             />
           </View>
 
           <View>
             <Select
-              label="Payment Status"
+              label="Estado de Pago"
               value={formData.paymentStatus}
               onValueChange={(value) =>
                 setFormData({ ...formData, paymentStatus: value })
               }
               options={paymentStatusOptions}
-              placeholder="Select Payment Status"
+              placeholder="Seleccionar Estado de Pago"
               error={errors.paymentStatus}
             />
           </View>
 
           <View>
             <Select
-              label="User"
+              label="Usuario"
               value={formData.userId.toString()}
               onValueChange={(value) =>
                 setFormData({ ...formData, userId: Number(value) })
               }
               options={userOptions}
-              placeholder="Select User"
+              placeholder="Seleccionar Usuario"
               error={errors.userId}
             />
           </View>
@@ -306,14 +306,14 @@ const OrderFormScreen = () => {
             <View className="flex-row gap-2 mt-6">
               <View className="flex-1">
                 <Button
-                  title={isEditing ? "Update Order" : "Create Order"}
+                  title={isEditing ? "Actualizar Orden" : "Crear Orden"}
                   onPress={handleSubmit}
                   loading={loading}
                 />
               </View>
               <View className="flex-1">
                 <Button
-                  title="Cancel"
+                  title="Cancelar"
                   onPress={() => router.back()}
                   variant="secondary"
                 />
