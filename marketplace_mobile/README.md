@@ -151,4 +151,4 @@ npx expo start --clear
 ```
 
 Luego presiona `w` para web o `a`/`i` para móvil.
-
+el archivo .env tiene que contener lo siguiente JWT_SECRET=misupersecretoultralargo1234567891011121314151617181920
