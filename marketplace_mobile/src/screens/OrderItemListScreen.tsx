@@ -1,7 +1,8 @@
 // src/screens/OrderItemListScreen.tsx
-import { useState, useEffect } from "react";
-import { View, Text, FlatList, Pressable, Alert, RefreshControl, ScrollView } from "react-native";
-import { router } from "expo-router";
+import { useState, useEffect, useCallback } from "react";
+import { View, Text, FlatList, Pressable, Alert, RefreshControl } from "react-native";
+import { router, useFocusEffect } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { getAllOrderItems, deleteOrderItem, OrderItem } from "../services/orderItemService";
 import { Loading, EmptyState } from "../components/ui";
 
@@ -13,6 +14,12 @@ export default function OrderItemListScreen() {
   useEffect(() => {
     loadOrderItems();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadOrderItems();
+    }, [])
+  );
 
   const loadOrderItems = async () => {
     try {
@@ -65,126 +72,138 @@ export default function OrderItemListScreen() {
 
   if (loading) return <Loading text="Loading order items..." />;
 
-  if (orderItems.length === 0) {
-    return (
-      <EmptyState
-        icon="📦"
-        title="No order items"
-        description="No order items registered. Create one to get started."
-        actionLabel="Add Order Item"
-        onAction={() => router.push("/order-item-form")}
-      />
-    );
-  }
-
   return (
     <View className="flex-1 bg-slate-50">
-      {/* Header */}
-      <View className="bg-white px-6 py-4 border-b border-slate-200">
-        <View className="flex-row justify-between items-center">
-          <View>
-            <Text className="text-2xl font-bold text-slate-800">Order Items</Text>
-            <Text className="text-slate-600 mt-1">
-              {orderItems.length} {orderItems.length === 1 ? "item" : "items"} registered
-            </Text>
+      {/* Modern Header with back button */}
+      <View className="bg-white px-6 py-4 border-b border-slate-200 shadow-sm">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center flex-1">
+            <Pressable
+              onPress={() => router.push("/home")}
+              className="mr-4 p-2 rounded-full bg-slate-100 active:bg-slate-200"
+            >
+              <Ionicons name="arrow-back" size={20} color="#1e293b" />
+            </Pressable>
+            <View>
+              <Text className="text-2xl font-bold text-slate-800">Order Items</Text>
+              <Text className="text-slate-600 mt-0.5">
+                {orderItems.length} {orderItems.length === 1 ? "item" : "items"} registered
+              </Text>
+            </View>
           </View>
           <Pressable
             onPress={() => router.push("/order-item-form")}
-            className="bg-success-500 px-4 py-2 rounded-lg active:bg-success-600"
+            className="bg-blue-600 px-4 py-2.5 rounded-xl flex-row items-center active:bg-blue-700 shadow-md"
           >
-            <Text className="text-white font-semibold">Add Item</Text>
+            <Ionicons name="add-circle-outline" size={18} color="white" />
+            <Text className="text-white font-semibold ml-1.5">Add</Text>
           </Pressable>
         </View>
       </View>
 
-      {/* Tabla */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={{ minWidth: 900 }}>
-          <FlatList
-            data={orderItems}
-            keyExtractor={(item) => item.id.toString()}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-            ListHeaderComponent={() => (
-              <View className="bg-slate-800 flex-row px-4 py-3">
-                <Text className="text-white font-bold text-xs w-12">ID</Text>
-                <Text className="text-white font-bold text-xs w-32">Product</Text>
-                <Text className="text-white font-bold text-xs w-20">Qty</Text>
-                <Text className="text-white font-bold text-xs w-24">Price</Text>
-                <Text className="text-white font-bold text-xs w-24">Subtotal</Text>
-                <Text className="text-white font-bold text-xs w-24">Order ID</Text>
-                <Text className="text-white font-bold text-xs w-24">Product ID</Text>
-                <Text className="text-white font-bold text-xs flex-1 text-center">Actions</Text>
-              </View>
-            )}
-            renderItem={({ item }) => (
-              <View className="bg-white flex-row px-4 py-3 border-b border-slate-200 items-center">
-                {/* ID */}
-                <Text className="text-slate-600 text-xs w-12">{item.id}</Text>
-                
-                {/* Product Name */}
-                <Text className="text-slate-800 font-semibold text-sm w-32" numberOfLines={2}>
-                  {item.productName || "N/A"}
-                </Text>
-                
-                {/* Quantity */}
-                <View className="w-20">
-                  <View className="bg-slate-100 px-2 py-1 rounded">
-                    <Text className="text-slate-700 text-xs font-bold text-center">
-                      {item.quantity}
-                    </Text>
-                  </View>
-                </View>
-                
-                {/* Price */}
-                <Text className="text-slate-600 text-xs w-24 font-mono">
-                  ${item.price.toFixed(2)}
-                </Text>
-                
-                {/* Subtotal */}
-                <Text className="text-success-600 text-sm font-bold w-24 font-mono">
-                  ${item.subtotal.toFixed(2)}
-                </Text>
-                
-                {/* Order ID */}
-                <View className="w-24">
-                  <View className="bg-primary-100 px-2 py-1 rounded">
-                    <Text className="text-primary-700 text-xs font-semibold text-center">
-                      #{item.orderId}
-                    </Text>
-                  </View>
-                </View>
-                
-                {/* Product ID */}
-                <View className="w-24">
-                  <View className="bg-warning-100 px-2 py-1 rounded">
-                    <Text className="text-warning-700 text-xs font-semibold text-center">
-                      P-{item.productId}
-                    </Text>
-                  </View>
-                </View>
-                
-                {/* Actions */}
-                <View className="flex-row gap-2 flex-1 justify-center">
-                  <Pressable
-                    onPress={() => router.push(`/order-item-form?id=${item.id}`)}
-                    className="bg-warning-500 px-3 py-1 rounded active:bg-warning-600"
-                  >
-                    <Text className="text-white text-xs font-semibold">Edit</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => handleDelete(item.id)}
-                    className="bg-danger-500 px-3 py-1 rounded active:bg-danger-600"
-                  >
-                    <Text className="text-white text-xs font-semibold">Delete</Text>
-                  </Pressable>
-                </View>
-              </View>
-            )}
+      {/* Card List */}
+      <FlatList
+        data={orderItems}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+        ListEmptyComponent={
+          <EmptyState
+            icon="📦"
+            title="No order items"
+            description="No order items registered. Create one to get started."
+            actionLabel="Add Order Item"
+            onAction={() => router.push("/order-item-form")}
           />
-        </View>
-      </ScrollView>
+        }
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        renderItem={({ item }) => (
+          <View className="bg-white rounded-2xl p-5 mb-4 shadow-lg border border-slate-100">
+            {/* Header with ID */}
+            <View className="flex-row items-center justify-between mb-4 pb-3 border-b border-slate-100">
+              <View className="flex-row items-center">
+                <View className="bg-blue-100 p-2 rounded-lg mr-3">
+                  <Ionicons name="cube-outline" size={20} color="#2563eb" />
+                </View>
+                <View>
+                  <Text className="text-xs text-slate-500 uppercase tracking-wide">Item #{item.id}</Text>
+                  <Text className="text-lg font-bold text-slate-800 mt-0.5">
+                    {item.productName || "N/A"}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Product & Order Info */}
+            <View className="mb-4 space-y-3">
+              <View className="flex-row items-center">
+                <Ionicons name="pricetag-outline" size={16} color="#64748b" />
+                <Text className="text-slate-600 ml-2 text-sm flex-1">
+                  Product ID: <Text className="font-semibold text-slate-800">P-{item.productId}</Text>
+                </Text>
+              </View>
+              
+              <View className="flex-row items-center">
+                <Ionicons name="receipt-outline" size={16} color="#64748b" />
+                <Text className="text-slate-600 ml-2 text-sm flex-1">
+                  Order ID: <Text className="font-semibold text-slate-800">#{item.orderId}</Text>
+                </Text>
+              </View>
+            </View>
+
+            {/* Financial Info */}
+            <View className="bg-slate-50 rounded-xl p-4 mb-4">
+              <View className="flex-row justify-between items-center mb-2">
+                <View className="flex-row items-center">
+                  <Ionicons name="layers-outline" size={16} color="#64748b" />
+                  <Text className="text-slate-600 ml-2">Quantity</Text>
+                </View>
+                <View className="bg-blue-100 px-3 py-1 rounded-lg">
+                  <Text className="text-blue-700 font-bold">{item.quantity}</Text>
+                </View>
+              </View>
+
+              <View className="flex-row justify-between items-center mb-2">
+                <View className="flex-row items-center">
+                  <Ionicons name="cash-outline" size={16} color="#64748b" />
+                  <Text className="text-slate-600 ml-2">Unit Price</Text>
+                </View>
+                <Text className="text-slate-800 font-semibold">${item.price.toFixed(2)}</Text>
+              </View>
+
+              <View className="h-px bg-slate-200 my-2" />
+
+              <View className="flex-row justify-between items-center">
+                <View className="flex-row items-center">
+                  <Ionicons name="calculator-outline" size={16} color="#10b981" />
+                  <Text className="text-slate-700 font-semibold ml-2">Subtotal</Text>
+                </View>
+                <Text className="text-green-600 font-bold text-lg">${item.subtotal.toFixed(2)}</Text>
+              </View>
+            </View>
+
+            {/* Action Buttons */}
+            <View className="flex-row gap-3">
+              <Pressable
+                onPress={() => router.push(`/order-item-form?id=${item.id}`)}
+                className="flex-1 bg-yellow-500 py-3 rounded-xl flex-row items-center justify-center active:bg-yellow-600"
+              >
+                <Ionicons name="create-outline" size={18} color="white" />
+                <Text className="text-white font-semibold ml-2">Edit</Text>
+              </Pressable>
+              
+              <Pressable
+                onPress={() => handleDelete(item.id)}
+                className="flex-1 bg-red-500 py-3 rounded-xl flex-row items-center justify-center active:bg-red-600"
+              >
+                <Ionicons name="trash-outline" size={18} color="white" />
+                <Text className="text-white font-semibold ml-2">Delete</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+      />
     </View>
   );
 }

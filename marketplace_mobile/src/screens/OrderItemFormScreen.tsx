@@ -7,8 +7,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Pressable,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { addOrderItem, getOrderItem, updateOrderItem } from "../services/orderItemService";
 import { Input, Button, Loading } from "../components/ui";
 
@@ -58,7 +60,8 @@ export default function OrderItemFormScreen() {
     setLoading(true);
     try {
       const res = await getOrderItem(orderItemId!);
-      const item = res.data;
+      // Handle ApiResponse wrapper from backend
+      const item = (res.data as any)?.data || res.data;
       setQuantity(item.quantity.toString());
       setPrice(item.price.toString());
       setSubtotal(item.subtotal.toString());
@@ -149,22 +152,33 @@ export default function OrderItemFormScreen() {
       className="flex-1 bg-slate-50"
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
+      {/* Modern Header */}
+      <View className="bg-white px-6 py-4 border-b border-slate-200 shadow-sm">
+        <View className="flex-row items-center">
+          <Pressable
+            onPress={() => router.back()}
+            className="mr-4 p-2 rounded-full bg-slate-100 active:bg-slate-200"
+          >
+            <Ionicons name="arrow-back" size={20} color="#1e293b" />
+          </Pressable>
+          <View>
+            <Text className="text-2xl font-bold text-slate-800">
+              {isEditing ? "Edit Order Item" : "New Order Item"}
+            </Text>
+            <Text className="text-slate-600 mt-0.5">
+              {isEditing 
+                ? "Modify order item information" 
+                : "Enter new order item information"}
+            </Text>
+          </View>
+        </View>
+      </View>
+
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View className="mb-6">
-          <Text className="text-3xl font-bold text-slate-800">
-            {isEditing ? "Edit Order Item" : "New Order Item"}
-          </Text>
-          <Text className="text-slate-600 mt-1">
-            {isEditing 
-              ? "Modify order item information" 
-              : "Enter new order item information"}
-          </Text>
-        </View>
 
         {/* Card contenedor */}
         <View className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">

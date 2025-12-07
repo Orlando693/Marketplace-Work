@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,8 @@ import {
   Pressable,
   RefreshControl,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { getAllOrders, deleteOrder, Order } from "../services/orderService";
 import Loading from "../components/ui/Loading";
 import EmptyState from "../components/ui/EmptyState";
@@ -21,6 +22,12 @@ const OrderListScreen = () => {
   useEffect(() => {
     loadOrders();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadOrders();
+    }, [])
+  );
 
   const loadOrders = async () => {
     try {
@@ -72,83 +79,97 @@ const OrderListScreen = () => {
   };
 
   const renderItem = ({ item }: { item: Order }) => (
-    <View className="bg-slate-900 m-3 rounded-lg border border-slate-700 p-4">
-      {/* Header con ID y Status */}
-      <View className="flex-row justify-between items-center mb-3">
-        <View className="flex-row items-center">
-          <Text className="text-slate-400 text-xs">Order #</Text>
-          <Text className="text-white text-lg font-bold ml-1">{item.id}</Text>
+    <View className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-slate-200">
+      {/* Header de la Card con ID y Status */}
+      <View className="flex-row justify-between items-center bg-slate-50 px-4 py-2 border-b border-slate-200">
+        <View className="flex-row items-center gap-1">
+          <Ionicons name="receipt" size={14} color="#64748b" />
+          <Text className="text-slate-500 text-xs font-medium">Order #{item.id}</Text>
         </View>
         <View
-          style={{
-            paddingHorizontal: 12,
-            paddingVertical: 6,
-            borderRadius: 6,
-            backgroundColor:
-              item.paymentStatus === "Complete"
-                ? "#16a34a"
-                : item.paymentStatus === "Pending"
-                ? "#ca8a04"
-                : "#475569",
-          }}
+          className={`px-3 py-1 rounded-full flex-row items-center gap-1 ${
+            item.paymentStatus === "Complete"
+              ? "bg-green-500"
+              : item.paymentStatus === "Pending"
+              ? "bg-yellow-500"
+              : "bg-slate-500"
+          }`}
         >
-          <Text className="text-white text-xs font-semibold">
+          <Ionicons 
+            name={item.paymentStatus === "Complete" ? "checkmark-circle" : "time"} 
+            size={12} 
+            color="white" 
+          />
+          <Text className="text-white text-xs font-bold">
             {item.paymentStatus || "N/A"}
           </Text>
         </View>
       </View>
 
-      {/* User y Date */}
-      <View className="mb-3">
-        <View className="flex-row items-center mb-2">
-          <Text className="text-slate-400 text-xs w-24">User:</Text>
-          <Text className="text-white text-sm flex-1">{item.userName}</Text>
+      {/* Contenido de la Card */}
+      <View className="p-4">
+        {/* User y Date */}
+        <View className="mb-3">
+          <View className="flex-row items-center gap-1 mb-2">
+            <Ionicons name="person" size={14} color="#64748b" />
+            <Text className="text-slate-500 text-xs font-medium">CUSTOMER</Text>
+          </View>
+          <Text className="text-slate-900 text-base font-semibold">{item.userName}</Text>
         </View>
-        <View className="flex-row items-center">
-          <Text className="text-slate-400 text-xs w-24">Date:</Text>
-          <Text className="text-white text-sm">{item.orderDate}</Text>
-        </View>
-      </View>
 
-      {/* Divider */}
-      <View className="border-t border-slate-700 my-3" />
-
-      {/* Financial Info */}
-      <View className="mb-3">
-        <View className="flex-row justify-between mb-2">
-          <Text className="text-slate-400 text-xs">Subtotal:</Text>
-          <Text className="text-white text-sm">{item.subtotal.toFixed(2)} {item.currency}</Text>
+        <View className="mb-3">
+          <View className="flex-row items-center gap-1 mb-1">
+            <Ionicons name="calendar" size={14} color="#64748b" />
+            <Text className="text-slate-500 text-xs font-medium">ORDER DATE</Text>
+          </View>
+          <Text className="text-slate-700 text-sm">{item.orderDate}</Text>
         </View>
-        <View className="flex-row justify-between mb-2">
-          <Text className="text-slate-400 text-xs">Tax:</Text>
-          <Text className="text-white text-sm">{item.tax.toFixed(2)} {item.currency}</Text>
-        </View>
-        <View className="flex-row justify-between">
-          <Text className="text-white text-sm font-bold">Total:</Text>
-          <Text className="text-white text-lg font-bold">{item.totalAmount.toFixed(2)} {item.currency}</Text>
-        </View>
-      </View>
 
-      {/* Payment Method */}
-      <View className="flex-row items-center mb-3">
-        <Text className="text-slate-400 text-xs w-24">Payment:</Text>
-        <Text className="text-white text-sm">{item.payMethod}</Text>
-      </View>
+        {/* Divider */}
+        <View className="border-t border-slate-200 my-3" />
 
-      {/* Actions */}
-      <View className="flex-row gap-2 mt-2">
-        <Pressable
-          onPress={() => router.push(`/order-form?id=${item.id}`)}
-          className="flex-1 bg-yellow-600 py-3 rounded-lg"
-        >
-          <Text className="text-white text-center font-semibold">Edit Order</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => handleDelete(item.id)}
-          className="flex-1 bg-red-600 py-3 rounded-lg"
-        >
-          <Text className="text-white text-center font-semibold">Delete</Text>
-        </Pressable>
+        {/* Financial Info */}
+        <View className="mb-3">
+          <View className="flex-row justify-between mb-2">
+            <Text className="text-slate-500 text-sm">Subtotal</Text>
+            <Text className="text-slate-700 text-sm font-medium">{item.subtotal.toFixed(2)} {item.currency}</Text>
+          </View>
+          <View className="flex-row justify-between mb-2">
+            <Text className="text-slate-500 text-sm">Tax</Text>
+            <Text className="text-slate-700 text-sm font-medium">{item.tax.toFixed(2)} {item.currency}</Text>
+          </View>
+          <View className="flex-row justify-between items-center pt-2 border-t border-slate-200">
+            <Text className="text-slate-900 text-base font-bold">Total</Text>
+            <Text className="text-primary-600 text-xl font-bold">{item.totalAmount.toFixed(2)} {item.currency}</Text>
+          </View>
+        </View>
+
+        {/* Payment Method */}
+        <View className="mb-4">
+          <View className="flex-row items-center gap-1 mb-1">
+            <Ionicons name="card" size={14} color="#64748b" />
+            <Text className="text-slate-500 text-xs font-medium">PAYMENT METHOD</Text>
+          </View>
+          <Text className="text-slate-700 text-sm font-medium">{item.payMethod}</Text>
+        </View>
+
+        {/* Actions */}
+        <View className="flex-row gap-2">
+          <Pressable
+            onPress={() => router.push(`/order-form?id=${item.id}`)}
+            className="flex-1 bg-warning-500 py-2.5 rounded-lg active:bg-warning-600 flex-row justify-center items-center gap-2"
+          >
+            <Ionicons name="create-outline" size={18} color="white" />
+            <Text className="text-white font-semibold text-sm">Edit</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => handleDelete(item.id)}
+            className="flex-1 bg-danger-500 py-2.5 rounded-lg active:bg-danger-600 flex-row justify-center items-center gap-2"
+          >
+            <Ionicons name="trash-outline" size={18} color="white" />
+            <Text className="text-white font-semibold text-sm">Delete</Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -158,37 +179,55 @@ const OrderListScreen = () => {
   }
 
   return (
-    <View className="flex-1 bg-slate-950">
-      {/* Header */}
-      <View className="flex-row justify-between items-center p-4 bg-slate-900 border-b border-slate-700">
-        <Text className="text-2xl font-bold text-white">Orders</Text>
-        <Pressable
-          onPress={() => router.push("/order-form")}
-          className="bg-blue-600 px-4 py-2 rounded-lg"
-        >
-          <Text className="text-white font-semibold">Add Order</Text>
-        </Pressable>
+    <View className="flex-1 bg-slate-50">
+      {/* Modern Header with back button */}
+      <View className="bg-white px-6 py-4 border-b border-slate-200 shadow-sm">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center flex-1">
+            <Pressable
+              onPress={() => router.push("/home")}
+              className="mr-4 p-2 rounded-full bg-slate-100 active:bg-slate-200"
+            >
+              <Ionicons name="arrow-back" size={20} color="#1e293b" />
+            </Pressable>
+            <View>
+              <Text className="text-2xl font-bold text-slate-800">Orders</Text>
+              <Text className="text-slate-600 mt-0.5">
+                {orders.length} {orders.length === 1 ? "order" : "orders"} registered
+              </Text>
+            </View>
+          </View>
+          <Pressable
+            onPress={() => router.push("/order-form")}
+            className="bg-blue-600 px-4 py-2.5 rounded-xl flex-row items-center active:bg-blue-700 shadow-md"
+          >
+            <Ionicons name="add-circle-outline" size={18} color="white" />
+            <Text className="text-white font-semibold ml-1.5">Add</Text>
+          </Pressable>
+        </View>
       </View>
 
-      {/* Orders List */}
+      {/* Card List */}
       <FlatList
         data={orders}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ padding: 16 }}
         ListEmptyComponent={
           <EmptyState
-            message="No orders found"
-            description="Create your first order"
+            icon="📦"
+            title="No orders"
+            description="No orders found. Create your first order."
+            actionLabel="Add Order"
+            onAction={() => router.push("/order-form")}
           />
         }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#3b82f6"
           />
         }
-        contentContainerStyle={{ paddingBottom: 20 }}
       />
     </View>
   );

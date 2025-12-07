@@ -34,7 +34,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         // No aplicar el filtro JWT a rutas públicas
         return path.startsWith("/api/auth/") || 
-               path.equals("/api/users");
+               path.equals("/api/users") ||
+               path.startsWith("/api/orders") ||
+               path.startsWith("/api/orderItems");
     }
 
     @Override

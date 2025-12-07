@@ -44,6 +44,10 @@ public class SecurityConfig {
                         ).permitAll()
                         // Permitir crear y listar usuarios sin autenticación
                         .requestMatchers("/api/users").permitAll()
+                        // Permitir crear y listar órdenes sin autenticación
+                        .requestMatchers("/api/orders", "/api/orders/**").permitAll()
+                        // Permitir crear y listar order items sin autenticación
+                        .requestMatchers("/api/orderItems", "/api/orderItems/**").permitAll()
                         // Requiere autenticación para ver perfil
                         .requestMatchers("/api/auth/me").authenticated()
                         // Todas las demás rutas requieren autenticación

@@ -91,34 +91,31 @@ export default function StoreListScreen() {
 
   if (loading) return <Loading text="Loading stores..." />;
 
-  if (stores.length === 0) {
-    return (
-      <EmptyState
-        icon="🏪"
-        title="No stores"
-        description="No stores registered. Create one to get started."
-        actionLabel="Add Store"
-        onAction={() => router.push("/store-form")}
-      />
-    );
-  }
-
   return (
     <View className="flex-1 bg-slate-50">
-      {/* Header */}
-      <View className="bg-white px-6 py-4 border-b border-slate-200">
-        <View className="flex-row justify-between items-center">
-          <View>
-            <Text className="text-2xl font-bold text-slate-800">Stores</Text>
-            <Text className="text-slate-600 mt-1">
-              {stores.length} {stores.length === 1 ? "store" : "stores"} registered
-            </Text>
+      {/* Modern Header with back button */}
+      <View className="bg-white px-6 py-4 border-b border-slate-200 shadow-sm">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center flex-1">
+            <Pressable
+              onPress={() => router.push("/home")}
+              className="mr-4 p-2 rounded-full bg-slate-100 active:bg-slate-200"
+            >
+              <Ionicons name="arrow-back" size={20} color="#1e293b" />
+            </Pressable>
+            <View>
+              <Text className="text-2xl font-bold text-slate-800">Stores</Text>
+              <Text className="text-slate-600 mt-0.5">
+                {stores.length} {stores.length === 1 ? "store" : "stores"} registered
+              </Text>
+            </View>
           </View>
           <Pressable
             onPress={() => router.push("/store-form")}
-            className="bg-slate-500 px-4 py-2 rounded-lg active:bg-slate-600"
+            className="bg-blue-600 px-4 py-2.5 rounded-xl flex-row items-center active:bg-blue-700 shadow-md"
           >
-            <Text className="text-white font-semibold">Add Store</Text>
+            <Ionicons name="add-circle-outline" size={18} color="white" />
+            <Text className="text-white font-semibold ml-1.5">Add</Text>
           </Pressable>
         </View>
       </View>
@@ -129,6 +126,15 @@ export default function StoreListScreen() {
           <FlatList
             data={stores}
             keyExtractor={(item) => item.id.toString()}
+            ListEmptyComponent={
+              <EmptyState
+                icon="🏪"
+                title="No stores"
+                description="No stores registered. Create one to get started."
+                actionLabel="Add Store"
+                onAction={() => router.push("/store-form")}
+              />
+            }
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }

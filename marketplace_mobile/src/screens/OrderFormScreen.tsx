@@ -6,8 +6,10 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import {
   addOrder,
   updateOrder,
@@ -28,6 +30,8 @@ const OrderFormScreen = () => {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [formData, setFormData] = useState<OrderRequest>({
+    subtotal: 0,
+    totalAmount: 0,
     tax: 0,
     currency: "",
     payMethod: "",
@@ -42,6 +46,7 @@ const OrderFormScreen = () => {
     if (isEditing) {
       loadOrder();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadUsers = async () => {
@@ -59,13 +64,15 @@ const OrderFormScreen = () => {
     setLoading(true);
     try {
       const res = await getOrder(Number(id));
-      const order = res.data;
+      const orderData = (res.data as any)?.data || res.data;
       setFormData({
-        tax: order.tax,
-        currency: order.currency,
-        payMethod: order.payMethod,
-        paymentStatus: order.paymentStatus,
-        userId: order.userId,
+        subtotal: orderData.subtotal || 0,
+        totalAmount: orderData.totalAmount || 0,
+        tax: orderData.tax || 0,
+        currency: orderData.currency || "",
+        payMethod: orderData.payMethod || "",
+        paymentStatus: orderData.paymentStatus || "",
+        userId: orderData.userId || 0,
       });
     } catch (error) {
       console.error("Error loading order:", error);
@@ -79,7 +86,15 @@ const OrderFormScreen = () => {
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.tax || formData.tax < 0) {
+    if (formData.subtotal === undefined || formData.subtotal < 0) {
+      newErrors.subtotal = "Subtotal must be 0 or greater";
+    }
+
+    if (formData.totalAmount === undefined || formData.totalAmount < 0) {
+      newErrors.totalAmount = "Total amount must be 0 or greater";
+    }
+
+    if (formData.tax === undefined || formData.tax < 0) {
       newErrors.tax = "Tax must be 0 or greater";
     }
 
@@ -112,6 +127,8 @@ const OrderFormScreen = () => {
     setLoading(true);
     try {
       const payload: OrderRequest = {
+        subtotal: Number(formData.subtotal),
+        totalAmount: Number(formData.totalAmount),
         tax: Number(formData.tax),
         currency: formData.currency,
         payMethod: formData.payMethod,
@@ -165,19 +182,65 @@ const OrderFormScreen = () => {
   }));
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-slate-950"
-    >
-      <ScrollView className="flex-1 p-4" style={{ paddingBottom: 100 }}>
-        <Text className="text-2xl font-bold text-white mb-6">
-          {isEditing ? "Edit Order" : "Add Order"}
-        </Text>
+    <View className="flex-1 bg-slate-50">
+      {/* Header */}
+      <View className="bg-white border-b border-slate-200">
+        <View className="h-12" />
+        <View className="px-4 pb-4">
+          <View className="flex-row items-center gap-3">
+            <Pressable
+              onPress={() => router.back()}
+              className="bg-slate-100 p-2.5 rounded-lg active:bg-slate-200"
+            >
+              <Ionicons name="arrow-back" size={22} color="#334155" />
+            </Pressable>
+            <View className="flex-1">
+              <Text className="text-2xl font-bold text-slate-800">
+                {isEditing ? "Edit Order" : "Create Order"}
+              </Text>
+              <Text className="text-slate-500 text-sm mt-0.5">
+                {isEditing ? "Update order information" : "Fill in the order details"}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
 
-        <View className="space-y-4">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+      >
+        <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>
+          <View className="space-y-4">
           <View>
             <Input
-              label="Tax"
+              label="Subtotal *"
+              value={formData.subtotal.toString()}
+              onChangeText={(text) =>
+                setFormData({ ...formData, subtotal: parseFloat(text) || 0 })
+              }
+              placeholder="0.00"
+              keyboardType="decimal-pad"
+              error={errors.subtotal}
+            />
+          </View>
+
+          <View>
+            <Input
+              label="Total Amount *"
+              value={formData.totalAmount.toString()}
+              onChangeText={(text) =>
+                setFormData({ ...formData, totalAmount: parseInt(text) || 0 })
+              }
+              placeholder="0"
+              keyboardType="numeric"
+              error={errors.totalAmount}
+            />
+          </View>
+
+          <View>
+            <Input
+              label="Tax *"
               value={formData.tax.toString()}
               onChangeText={(text) =>
                 setFormData({ ...formData, tax: parseFloat(text) || 0 })
@@ -240,25 +303,26 @@ const OrderFormScreen = () => {
             />
           </View>
 
-          <View className="flex-row gap-2 mt-6">
-            <View className="flex-1">
-              <Button
-                title={isEditing ? "Update" : "Create"}
-                onPress={handleSubmit}
-                loading={loading}
-              />
-            </View>
-            <View className="flex-1">
-              <Button
-                title="Cancel"
-                onPress={() => router.back()}
-                variant="secondary"
-              />
+            <View className="flex-row gap-2 mt-6">
+              <View className="flex-1">
+                <Button
+                  title={isEditing ? "Update Order" : "Create Order"}
+                  onPress={handleSubmit}
+                  loading={loading}
+                />
+              </View>
+              <View className="flex-1">
+                <Button
+                  title="Cancel"
+                  onPress={() => router.back()}
+                  variant="secondary"
+                />
+              </View>
             </View>
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 

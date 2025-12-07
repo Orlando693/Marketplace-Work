@@ -14,6 +14,8 @@ export interface Order {
 }
 
 export interface OrderRequest {
+  subtotal: number;
+  totalAmount: number;
   tax: number;
   currency: string;
   payMethod: string;
