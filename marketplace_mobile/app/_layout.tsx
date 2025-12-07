@@ -22,6 +22,8 @@ export default function RootLayout() {
       <Stack.Screen name="order-item-form" />
       <Stack.Screen name="review-list" />
       <Stack.Screen name="review-form" />
+      <Stack.Screen name="store-list" />
+      <Stack.Screen name="store-form" />
     </Stack>
   );
 }
