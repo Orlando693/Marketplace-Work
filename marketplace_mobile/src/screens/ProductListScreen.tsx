@@ -1,19 +1,17 @@
 // src/screens/ProductListScreen.tsx
 import { useState, useEffect } from "react";
-import { View, Text, FlatList, Pressable, Alert, RefreshControl, ScrollView } from "react-native";
+import { View, Text, FlatList, Pressable, Alert, RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { getAllProducts, deleteProduct, Product } from "../services/productService";
 import { Loading, EmptyState } from "../components/ui";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 export default function ProductListScreen() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
 
   const loadProducts = async () => {
     try {
@@ -34,6 +32,12 @@ export default function ProductListScreen() {
       setRefreshing(false);
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadProducts();
+    }, [])
+  );
 
   const handleDelete = (id: number) => {
     Alert.alert(
@@ -75,9 +79,9 @@ export default function ProductListScreen() {
   };
 
   const getStockStatus = (stock: number) => {
-    if (stock === 0) return { label: "Out of Stock", color: "danger" };
-    if (stock < 10) return { label: "Low Stock", color: "warning" };
-    return { label: "In Stock", color: "success" };
+    if (stock === 0) return { label: "Out of Stock", color: "bg-red-100", textColor: "text-red-700" };
+    if (stock < 10) return { label: "Low Stock", color: "bg-yellow-100", textColor: "text-yellow-700" };
+    return { label: "In Stock", color: "bg-green-100", textColor: "text-green-700" };
   };
 
   if (loading) return <Loading text="Loading products..." />;
@@ -85,7 +89,7 @@ export default function ProductListScreen() {
   return (
     <View className="flex-1 bg-slate-50">
       {/* Modern Header with back button */}
-      <View className="bg-white px-6 py-4 border-b border-slate-200 shadow-sm">
+      <View className="bg-white px-6 pt-12 pb-4 border-b border-slate-200 shadow-sm">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">
             <Pressable
@@ -111,141 +115,103 @@ export default function ProductListScreen() {
         </View>
       </View>
 
-      {/* Tabla */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={{ minWidth: 1100 }}>
-          <FlatList
-            data={products}
-            keyExtractor={(item) => item.id.toString()}
-            ListEmptyComponent={
-              <EmptyState
-                icon="📦"
-                title="No products"
-                description="No products registered. Create one to get started."
-                actionLabel="Add Product"
-                onAction={() => router.push("/product-form")}
-              />
-            }
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-            ListHeaderComponent={() => (
-              <View className="bg-slate-800 flex-row px-4 py-3">
-                <Text className="text-white font-bold text-xs w-12">ID</Text>
-                <Text className="text-white font-bold text-xs w-40">Product Name</Text>
-                <Text className="text-white font-bold text-xs flex-1">Description</Text>
-                <Text className="text-white font-bold text-xs w-24">Price</Text>
-                <Text className="text-white font-bold text-xs w-20">Stock</Text>
-                <Text className="text-white font-bold text-xs w-28">Status</Text>
-                <Text className="text-white font-bold text-xs w-32">Store</Text>
-                <Text className="text-white font-bold text-xs w-24">Reviews</Text>
-                <Text className="text-white font-bold text-xs w-28">Published</Text>
-                <Text className="text-white font-bold text-xs w-32 text-center">Actions</Text>
+      {/* Card List */}
+      <FlatList
+        data={products}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ padding: 16 }}
+        ListEmptyComponent={
+          <EmptyState
+            icon="📦"
+            title="No products"
+            description="No products registered. Create one to get started."
+            actionLabel="Add Product"
+            onAction={() => router.push("/product-form")}
+          />
+        }
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        renderItem={({ item }) => {
+          const stockStatus = getStockStatus(item.stock);
+          return (
+            <View className="bg-white rounded-2xl p-5 mb-4 shadow-lg border border-slate-100">
+              {/* Header with icon and ID */}
+              <View className="flex-row items-center mb-3">
+                <View className="w-12 h-12 rounded-xl bg-purple-100 items-center justify-center mr-3">
+                  <Ionicons name="cube-outline" size={24} color="#9333ea" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-xs text-slate-500 uppercase tracking-wide">Product #{item.id}</Text>
+                  <Text className="text-lg font-bold text-slate-800 mt-0.5">{item.name}</Text>
+                </View>
+                <View className={`px-3 py-1.5 rounded-full ${stockStatus.color}`}>
+                  <Text className={`text-xs font-semibold ${stockStatus.textColor}`}>
+                    {stockStatus.label}
+                  </Text>
+                </View>
               </View>
-            )}
-            renderItem={({ item }) => {
-              const stockStatus = getStockStatus(item.stock);
-              return (
-                <View className="bg-white flex-row px-4 py-3 border-b border-slate-200 items-center">
-                  {/* ID */}
-                  <Text className="text-slate-600 text-xs w-12">{item.id}</Text>
-                  
-                  {/* Product Name */}
-                  <View className="w-40">
-                    <Text className="text-slate-800 font-bold text-sm" numberOfLines={2}>
-                      {item.name}
-                    </Text>
-                  </View>
-                  
-                  {/* Description */}
-                  <Text className="text-slate-600 text-sm flex-1 pr-2" numberOfLines={2}>
-                    {item.description}
-                  </Text>
-                  
-                  {/* Price */}
-                  <Text className="text-success-600 font-bold text-sm w-24 font-mono">
-                    ${parseFloat(item.price.toString()).toFixed(2)}
-                  </Text>
-                  
-                  {/* Stock */}
-                  <View className="w-20">
-                    <View className="bg-slate-100 px-2 py-1 rounded">
-                      <Text className="text-slate-700 text-xs font-bold text-center">
-                        {item.stock}
-                      </Text>
+
+              {/* Description */}
+              <Text className="text-slate-600 mb-4 leading-5">{item.description}</Text>
+
+              {/* Info Grid */}
+              <View className="bg-slate-50 rounded-xl p-4 mb-4">
+                <View className="flex-row mb-3">
+                  <View className="flex-1">
+                    <View className="flex-row items-center mb-1">
+                      <Ionicons name="cash-outline" size={16} color="#64748b" />
+                      <Text className="text-xs text-slate-500 ml-1.5">Price</Text>
                     </View>
+                    <Text className="text-base font-bold text-slate-800">${item.price}</Text>
                   </View>
-                  
-                  {/* Stock Status */}
-                  <View className="w-28">
-                    <View
-                      className={`px-2 py-1 rounded ${
-                        stockStatus.color === "success"
-                          ? "bg-success-100"
-                          : stockStatus.color === "warning"
-                          ? "bg-warning-100"
-                          : "bg-danger-100"
-                      }`}
-                    >
-                      <Text
-                        className={`text-xs font-bold text-center ${
-                          stockStatus.color === "success"
-                            ? "text-success-700"
-                            : stockStatus.color === "warning"
-                            ? "text-warning-700"
-                            : "text-danger-700"
-                        }`}
-                      >
-                        {stockStatus.label}
-                      </Text>
+                  <View className="flex-1">
+                    <View className="flex-row items-center mb-1">
+                      <Ionicons name="cube-outline" size={16} color="#64748b" />
+                      <Text className="text-xs text-slate-500 ml-1.5">Stock</Text>
                     </View>
-                  </View>
-                  
-                  {/* Store */}
-                  <View className="w-32">
-                    <View className="bg-slate-100 px-2 py-1 rounded">
-                      <Text className="text-slate-700 text-xs font-semibold" numberOfLines={1}>
-                        {item.storeName || `Store #${item.storeId}`}
-                      </Text>
-                    </View>
-                  </View>
-                  
-                  {/* Reviews Count */}
-                  <View className="w-24">
-                    <View className="flex-row items-center justify-center gap-1">
-                      <Ionicons name="star" size={14} color="#eab308" />
-                      <Text className="text-warning-600 text-xs font-bold">
-                        {item.reviewsId?.length || 0}
-                      </Text>
-                    </View>
-                  </View>
-                  
-                  {/* Published Date */}
-                  <Text className="text-slate-500 text-xs w-28">
-                    {formatDate(item.publishedDate)}
-                  </Text>
-                  
-                  {/* Actions */}
-                  <View className="flex-row gap-2 w-32 justify-center">
-                    <Pressable
-                      onPress={() => router.push(`/product-form?id=${item.id}`)}
-                      className="bg-warning-500 px-3 py-1 rounded active:bg-warning-600"
-                    >
-                      <Text className="text-white text-xs font-semibold">Edit</Text>
-                    </Pressable>
-                    <Pressable
-                      onPress={() => handleDelete(item.id)}
-                      className="bg-danger-500 px-3 py-1 rounded active:bg-danger-600"
-                    >
-                      <Text className="text-white text-xs font-semibold">Delete</Text>
-                    </Pressable>
+                    <Text className="text-base font-bold text-slate-800">{item.stock} units</Text>
                   </View>
                 </View>
-              );
-            }}
-          />
-        </View>
-      </ScrollView>
+                <View className="flex-row">
+                  <View className="flex-1">
+                    <View className="flex-row items-center mb-1">
+                      <Ionicons name="storefront-outline" size={16} color="#64748b" />
+                      <Text className="text-xs text-slate-500 ml-1.5">Store ID</Text>
+                    </View>
+                    <Text className="text-base font-bold text-slate-800">#{item.storeId}</Text>
+                  </View>
+                  <View className="flex-1">
+                    <View className="flex-row items-center mb-1">
+                      <Ionicons name="calendar-outline" size={16} color="#64748b" />
+                      <Text className="text-xs text-slate-500 ml-1.5">Published</Text>
+                    </View>
+                    <Text className="text-base font-bold text-slate-800">{formatDate(item.publishedDate)}</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Action Buttons */}
+              <View className="flex-row gap-3">
+                <Pressable
+                  onPress={() => router.push(`/product-form?id=${item.id}`)}
+                  className="flex-1 bg-yellow-500 py-3 rounded-xl flex-row items-center justify-center active:bg-yellow-600"
+                >
+                  <Ionicons name="create-outline" size={18} color="white" />
+                  <Text className="text-white font-semibold ml-2">Edit</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => handleDelete(item.id)}
+                  className="flex-1 bg-red-500 py-3 rounded-xl flex-row items-center justify-center active:bg-red-600"
+                >
+                  <Ionicons name="trash-outline" size={18} color="white" />
+                  <Text className="text-white font-semibold ml-2">Delete</Text>
+                </Pressable>
+              </View>
+            </View>
+          );
+        }}
+      />
     </View>
   );
 }

@@ -16,6 +16,7 @@ import java.util.List;
 @Data // Incluye Getters, Setters, equals, hashCode, toString (Lombok)
 @NoArgsConstructor
 @AllArgsConstructor
+@lombok.Builder
 @Table(name = "products") // Mapea a una tabla llamada 'products'
 public class Product {
 
@@ -42,6 +43,7 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
+    @lombok.Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public void  addOrderItem(OrderItem orderItem) {
@@ -60,6 +62,7 @@ public class Product {
 
     @OneToMany(mappedBy = "product",cascade = CascadeType.ALL,orphanRemoval = true)
     @JsonManagedReference
+    @lombok.Builder.Default
     private List<Review> reviews = new ArrayList<>();
     // - Misma lógica que en orderItems: colección administrada por Product.
 

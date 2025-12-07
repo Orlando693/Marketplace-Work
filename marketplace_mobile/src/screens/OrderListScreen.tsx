@@ -181,7 +181,7 @@ const OrderListScreen = () => {
   return (
     <View className="flex-1 bg-slate-50">
       {/* Modern Header with back button */}
-      <View className="bg-white px-6 py-4 border-b border-slate-200 shadow-sm">
+      <View className="bg-white px-6 pt-12 pb-4 border-b border-slate-200 shadow-sm">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">
             <Pressable

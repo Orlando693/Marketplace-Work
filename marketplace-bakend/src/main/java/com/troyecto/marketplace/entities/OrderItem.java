@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@lombok.Builder
 @Table(name = "order_items")
 public class OrderItem {
     @Id

@@ -15,6 +15,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@lombok.Builder
 @Table(name = "reviews")
 public class Review {
     @Id

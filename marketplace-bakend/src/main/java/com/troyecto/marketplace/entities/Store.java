@@ -14,6 +14,7 @@ import java.util.List;
 @Data // Incluye Getters, Setters, toString, equals y hashCode (gracias a Lombok)
 @NoArgsConstructor
 @AllArgsConstructor
+@lombok.Builder
 @Table(name = "stores") // Mapea a una tabla llamada 'stores' en la base de datos
 public class Store {
 

@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@lombok.Builder
 @Table(name = "orders")
 public class Order {
     @Id
@@ -46,6 +47,7 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference
+    @lombok.Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
     // Es importante mantener la consistencia de la relación bidireccional
     public void addOrderItem(OrderItem orderItem){

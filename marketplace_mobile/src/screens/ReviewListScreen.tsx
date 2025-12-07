@@ -1,19 +1,16 @@
 // src/screens/ReviewListScreen.tsx
-import { useState, useEffect } from "react";
-import { View, Text, FlatList, Pressable, Alert, RefreshControl, ScrollView } from "react-native";
+import { useState, useCallback } from "react";
+import { View, Text, FlatList, Pressable, Alert, RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { getAllReviews, deleteReview, Review } from "../services/reviewService";
 import { Loading, EmptyState } from "../components/ui";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function ReviewListScreen() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-
-  useEffect(() => {
-    loadReviews();
-  }, []);
 
   const loadReviews = async () => {
     try {
@@ -34,6 +31,12 @@ export default function ReviewListScreen() {
       setRefreshing(false);
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadReviews();
+    }, [])
+  );
 
   const handleDelete = (id: number) => {
     Alert.alert(
@@ -94,7 +97,7 @@ export default function ReviewListScreen() {
   return (
     <View className="flex-1 bg-slate-50">
       {/* Modern Header with back button */}
-      <View className="bg-white px-6 py-4 border-b border-slate-200 shadow-sm">
+      <View className="bg-white px-6 pt-12 pb-4 border-b border-slate-200 shadow-sm">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">
             <Pressable
@@ -120,104 +123,101 @@ export default function ReviewListScreen() {
         </View>
       </View>
 
-      {/* Tabla */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={{ minWidth: 900 }}>
-          <FlatList
-            data={reviews}
-            keyExtractor={(item) => item.id.toString()}
-            ListEmptyComponent={
-              <EmptyState
-                icon="⭐"
-                title="No reviews"
-                description="No reviews registered. Create one to get started."
-                actionLabel="Add Review"
-                onAction={() => router.push("/review-form")}
-              />
-            }
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-            ListHeaderComponent={() => (
-              <View className="bg-slate-800 flex-row px-4 py-3">
-                <Text className="text-white font-bold text-xs w-12">ID</Text>
-                <Text className="text-white font-bold text-xs w-24">Rating</Text>
-                <Text className="text-white font-bold text-xs flex-1">Comment</Text>
-                <Text className="text-white font-bold text-xs w-24">User ID</Text>
-                <Text className="text-white font-bold text-xs w-28">Product ID</Text>
-                <Text className="text-white font-bold text-xs w-24">Created</Text>
-                <Text className="text-white font-bold text-xs w-24">Updated</Text>
-                <Text className="text-white font-bold text-xs w-32 text-center">Actions</Text>
+      {/* Card List */}
+      <FlatList
+        data={reviews}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ padding: 16 }}
+        ListEmptyComponent={
+          <EmptyState
+            icon="⭐"
+            title="No reviews"
+            description="No reviews registered. Create one to get started."
+            actionLabel="Add Review"
+            onAction={() => router.push("/review-form")}
+          />
+        }
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        renderItem={({ item }) => (
+          <View className="bg-white rounded-2xl p-5 mb-4 shadow-lg border border-slate-100">
+            {/* Header with icon and ID */}
+            <View className="flex-row items-center mb-3">
+              <View className="w-12 h-12 rounded-xl bg-yellow-100 items-center justify-center mr-3">
+                <Ionicons name="star" size={24} color="#eab308" />
               </View>
-            )}
-            renderItem={({ item }) => (
-              <View className="bg-white flex-row px-4 py-3 border-b border-slate-200 items-center">
-                {/* ID */}
-                <Text className="text-slate-600 text-xs w-12">{item.id}</Text>
-                
-                {/* Rating */}
-                <View className="w-24">
-                  <View className="flex-row items-center gap-1">
-                    {renderStars(item.rating)}
-                  </View>
-                  <Text className="text-warning-600 font-bold text-xs mt-1">
+              <View className="flex-1">
+                <Text className="text-xs text-slate-500 uppercase tracking-wide">Review #{item.id}</Text>
+                <View className="flex-row items-center mt-1">
+                  {renderStars(item.rating)}
+                  <Text className="text-sm font-bold text-slate-800 ml-2">
                     {item.rating}/5
                   </Text>
                 </View>
-                
-                {/* Comment */}
-                <Text className="text-slate-700 text-sm flex-1 pr-2" numberOfLines={2}>
-                  {item.comment}
-                </Text>
-                
-                {/* User ID */}
-                <View className="w-24">
-                  <View className="bg-primary-100 px-2 py-1 rounded">
-                    <Text className="text-primary-700 text-xs font-semibold text-center">
-                      U-{item.userId}
-                    </Text>
-                  </View>
-                </View>
-                
-                {/* Product ID */}
-                <View className="w-28">
-                  <View className="bg-warning-100 px-2 py-1 rounded">
-                    <Text className="text-warning-700 text-xs font-semibold text-center">
-                      P-{item.productId}
-                    </Text>
-                  </View>
-                </View>
-                
-                {/* Created Date */}
-                <Text className="text-slate-500 text-xs w-24">
+              </View>
+              <View className="bg-slate-100 px-3 py-1.5 rounded-full">
+                <Text className="text-xs font-semibold text-slate-700">
                   {formatDate(item.createdDate)}
                 </Text>
-                
-                {/* Updated Date */}
-                <Text className="text-slate-500 text-xs w-24">
-                  {formatDate(item.updatedDate)}
-                </Text>
-                
-                {/* Actions */}
-                <View className="flex-row gap-2 w-32 justify-center">
-                  <Pressable
-                    onPress={() => router.push(`/review-form?id=${item.id}`)}
-                    className="bg-warning-500 px-3 py-1 rounded active:bg-warning-600"
-                  >
-                    <Text className="text-white text-xs font-semibold">Edit</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => handleDelete(item.id)}
-                    className="bg-danger-500 px-3 py-1 rounded active:bg-danger-600"
-                  >
-                    <Text className="text-white text-xs font-semibold">Delete</Text>
-                  </Pressable>
+              </View>
+            </View>
+
+            {/* Comment */}
+            <View className="bg-slate-50 rounded-xl p-4 mb-4">
+              <Text className="text-slate-700 leading-5 italic">&ldquo;{item.comment}&rdquo;</Text>
+            </View>
+
+            {/* Info Grid */}
+            <View className="bg-slate-50 rounded-xl p-4 mb-4">
+              <View className="flex-row mb-3">
+                <View className="flex-1">
+                  <View className="flex-row items-center mb-1">
+                    <Ionicons name="person-outline" size={16} color="#64748b" />
+                    <Text className="text-xs text-slate-500 ml-1.5">User</Text>
+                  </View>
+                  <Text className="text-base font-bold text-slate-800">User #{item.userId}</Text>
+                </View>
+                <View className="flex-1">
+                  <View className="flex-row items-center mb-1">
+                    <Ionicons name="cube-outline" size={16} color="#64748b" />
+                    <Text className="text-xs text-slate-500 ml-1.5">Product</Text>
+                  </View>
+                  <Text className="text-base font-bold text-slate-800">Product #{item.productId}</Text>
                 </View>
               </View>
-            )}
-          />
-        </View>
-      </ScrollView>
+              <View className="flex-row">
+                <View className="flex-1">
+                  <View className="flex-row items-center mb-1">
+                    <Ionicons name="calendar-outline" size={16} color="#64748b" />
+                    <Text className="text-xs text-slate-500 ml-1.5">Updated</Text>
+                  </View>
+                  <Text className="text-base font-bold text-slate-800">{formatDate(item.updatedDate)}</Text>
+                </View>
+                <View className="flex-1" />
+              </View>
+            </View>
+
+            {/* Action Buttons */}
+            <View className="flex-row gap-3">
+              <Pressable
+                onPress={() => router.push(`/review-form?id=${item.id}`)}
+                className="flex-1 bg-yellow-500 py-3 rounded-xl flex-row items-center justify-center active:bg-yellow-600"
+              >
+                <Ionicons name="create-outline" size={18} color="white" />
+                <Text className="text-white font-semibold ml-2">Edit</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => handleDelete(item.id)}
+                className="flex-1 bg-red-500 py-3 rounded-xl flex-row items-center justify-center active:bg-red-600"
+              >
+                <Ionicons name="trash-outline" size={18} color="white" />
+                <Text className="text-white font-semibold ml-2">Delete</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+      />
     </View>
   );
 }

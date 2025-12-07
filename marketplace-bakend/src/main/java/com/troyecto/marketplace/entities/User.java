@@ -17,6 +17,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@lombok.Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,6 +41,7 @@ public class User {
     // - mappedBy indica que la entidad Order tiene la FK (relación bidireccional).
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
+    @lombok.Builder.Default
     private List<Order> orders = new ArrayList<>();
 
     public void addOrder(Order order) {
@@ -56,6 +58,7 @@ public class User {
     // - Atención: OneToMany por defecto es LAZY; acceder a reviews fuera de una transacción puede lanzar LazyInitializationException.
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
     @JsonBackReference
+    @lombok.Builder.Default
     private List<Review> reviews = new ArrayList<>();
     public void addReview(Review review) {
         reviews.add(review);
@@ -70,6 +73,7 @@ public class User {
     // - misma lógica que las anteriores: mantener consistencia bidireccional usando add/remove.
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
     @JsonBackReference
+    @lombok.Builder.Default
     private List<Store> stores = new ArrayList<>();
     public void addStore(Store store) {
         stores.add(store);
