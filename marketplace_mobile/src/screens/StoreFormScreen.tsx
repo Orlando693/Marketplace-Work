@@ -1,4 +1,3 @@
-// src/screens/StoreFormScreen.tsx
 import { useState, useEffect } from "react";
 import {
   View,

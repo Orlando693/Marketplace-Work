@@ -1,4 +1,3 @@
-// src/screens/HomeScreen.tsx
 import { View, Text, Pressable, ScrollView, Alert, Platform, Dimensions } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -35,7 +34,6 @@ export default function HomeScreen() {
 
   return (
     <ScrollView className="flex-1 bg-slate-50">
-      {/* Header con color primary (azul como web) */}
       <View className="bg-primary-600 px-6 pt-12 pb-8 rounded-b-3xl">
         <View style={{ maxWidth: isLargeScreen ? 1200 : "100%", width: "100%", alignSelf: "center" }}>
           <Text className="text-white text-3xl font-bold">
@@ -49,13 +47,10 @@ export default function HomeScreen() {
           </Text>
         </View>
       </View>
-
-      {/* Contenido */}
       <View 
         className="px-6 mt-6"
         style={{ maxWidth: isLargeScreen ? 1200 : "100%", width: "100%", alignSelf: "center" }}
       >
-        {/* Sección de módulos */}
         <Text className="text-2xl font-bold text-slate-800 mb-4">
           Modules
         </Text>
@@ -182,7 +177,6 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        {/* Footer text */}
         <View className="mt-4 mb-6">
           <Text className="text-slate-400 text-xs text-center">
             Empowering organizations with efficient marketplace management tools.

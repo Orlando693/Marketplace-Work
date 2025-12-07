@@ -1,4 +1,3 @@
-// src/screens/ProductListScreen.tsx
 import { useState, useEffect } from "react";
 import { View, Text, FlatList, Pressable, Alert, RefreshControl } from "react-native";
 import { router } from "expo-router";
@@ -15,19 +14,18 @@ export default function ProductListScreen() {
 
   const loadProducts = async () => {
     try {
-      console.log("🔄 Loading products...");
+      console.log("Loading products...");
       const res = await getAllProducts();
-      console.log("📦 Products API Response:", res);
-      console.log("📦 Products data:", res.data);
+      console.log("Products API Response:", res);
+      console.log("Products data:", res.data);
       
-      // El backend devuelve ApiResponse<List<ProductResponse>>
       const productsArray = (res.data as any)?.data || res.data;
-      console.log("✅ Products array parsed:", productsArray);
-      console.log("📊 Number of products:", productsArray?.length || 0);
+      console.log("Products array parsed:", productsArray);
+      console.log("Number of products:", productsArray?.length || 0);
       
       setProducts(Array.isArray(productsArray) ? productsArray : []);
     } catch (error) {
-      console.error("❌ Error loading products:", error);
+      console.error("Error loading products:", error);
       Alert.alert("Error", "Could not load products");
     } finally {
       setLoading(false);
@@ -43,8 +41,8 @@ export default function ProductListScreen() {
 
   const handleDelete = (id: number) => {
     Alert.alert(
-      "Delete Product",
-      "Are you sure you want to permanently delete this product?",
+      "Eliminar Producto",
+      "¿Estás seguro de eliminar este producto?",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -90,7 +88,6 @@ export default function ProductListScreen() {
 
   return (
     <View className="flex-1 bg-slate-50">
-      {/* Modern Header with back button */}
       <View className="bg-white px-6 pt-12 pb-4 border-b border-slate-200 shadow-sm">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">

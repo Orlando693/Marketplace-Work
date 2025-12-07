@@ -1,4 +1,3 @@
-// src/screens/ReviewFormScreen.tsx
 import { useState, useEffect } from "react";
 import {
   View,
@@ -46,7 +45,6 @@ export default function ReviewFormScreen() {
     if (isEditing) {
       fetchReview();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reviewId]);
 
   const loadUsers = async () => {
@@ -75,14 +73,12 @@ export default function ReviewFormScreen() {
     setLoading(true);
     try {
       const res = await getReview(reviewId!);
-      // Handle ApiResponse wrapper from backend
       const review = (res.data as any)?.data || res.data;
       setRating(review.rating);
       setComment(review.comment);
       setUserId(review.userId.toString());
       setProductId(review.productId.toString());
       
-      // Set user and product names from loaded arrays
       const selectedUser = users.find((u) => u.id === review.userId);
       if (selectedUser) {
         setUserName(`${selectedUser.firstName} ${selectedUser.lastName}`);

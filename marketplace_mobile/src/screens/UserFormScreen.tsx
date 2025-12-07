@@ -1,4 +1,3 @@
-// src/screens/UserFormScreen.tsx
 import { useState, useEffect } from "react";
 import {
   View,
@@ -102,23 +101,23 @@ export default function UserFormScreen() {
 
       if (isEditing) {
         const response = await updateUser(userId!, payload);
-        console.log("✅ User updated:", response.data);
+        console.log("User updated:", response.data);
         Alert.alert("Éxito", "Usuario actualizado exitosamente");
       } else {
         const response = await addUser(payload);
-        console.log("✅ User created:", response.data);
+        console.log("User created:", response.data);
         Alert.alert("Éxito", "Usuario creado exitosamente", [
           {
             text: "OK",
             onPress: () => router.back()
           }
         ]);
-        return; // No hacer router.back() automáticamente
+        return; 
       }
 
       router.back();
     } catch (error: any) {
-      console.error("❌ Error saving user:", error);
+      console.error("Error saving user:", error);
       console.error("Error response:", error?.response?.data);
       console.error("Error message:", error?.message);
       

@@ -1,4 +1,3 @@
-// src/screens/ReviewListScreen.tsx
 import { useState, useCallback } from "react";
 import { View, Text, FlatList, Pressable, Alert, RefreshControl } from "react-native";
 import { router } from "expo-router";
@@ -16,23 +15,23 @@ export default function ReviewListScreen() {
 
   const loadReviews = async () => {
     try {
-      console.log("🔄 Loading reviews, users, and products...");
+      console.log("Loading reviews, users, and products...");
       const [reviewsRes, usersRes, productsRes] = await Promise.all([
         getAllReviews(),
         getAllUsers(),
         getAllProducts(),
       ]);
       
-      console.log("📦 Reviews response:", reviewsRes.data);
-      console.log("👥 Users response:", usersRes.data);
-      console.log("🛍️ Products response:", productsRes.data);
+      console.log("Reviews response:", reviewsRes.data);
+      console.log("Users response:", usersRes.data);
+      console.log("Products response:", productsRes.data);
       
       // El backend devuelve ApiResponse<List<ReviewResponse>>
       const reviewsArray = (reviewsRes.data as any)?.data || reviewsRes.data;
       const usersArray = (usersRes.data as any)?.data || usersRes.data;
       const productsArray = (productsRes.data as any)?.data || productsRes.data;
       
-      console.log("✅ Parsed arrays:", {
+      console.log("Parsed arrays:", {
         reviews: reviewsArray?.length || 0,
         users: usersArray?.length || 0,
         products: productsArray?.length || 0
@@ -53,7 +52,7 @@ export default function ReviewListScreen() {
       console.log("✨ Enriched reviews:", enrichedReviews);
       setReviews(enrichedReviews);
     } catch (error) {
-      console.error("❌ Error loading reviews:", error);
+      console.error("Error loading reviews:", error);
       Alert.alert("Error", "Could not load reviews");
     } finally {
       setLoading(false);
@@ -69,8 +68,8 @@ export default function ReviewListScreen() {
 
   const handleDelete = (id: number) => {
     Alert.alert(
-      "Delete Review",
-      "Are you sure you want to permanently delete this review?",
+      "Eliminar Reseña",
+      "¿Estás seguro de eliminar esta reseña?",
       [
         { text: "Cancel", style: "cancel" },
         {

@@ -1,4 +1,3 @@
-// src/screens/OrderItemListScreen.tsx
 import { useState, useEffect, useCallback } from "react";
 import { View, Text, FlatList, Pressable, Alert, RefreshControl } from "react-native";
 import { router, useFocusEffect } from "expo-router";
@@ -168,7 +167,7 @@ export default function OrderItemListScreen() {
               </View>
             </View>
 
-            {/* Action Buttons */}
+        
             <View className="flex-row gap-3">
               <Pressable
                 onPress={() => router.push(`/order-item-form?id=${item.id}`)}

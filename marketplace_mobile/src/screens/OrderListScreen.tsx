@@ -35,7 +35,6 @@ const OrderListScreen = () => {
       console.log("API Response:", res);
       console.log("Orders data:", res.data);
       
-      // Handle ApiResponse wrapper from backend
       const ordersArray = (res.data as any)?.data || res.data;
       console.log("Orders array:", ordersArray);
       
@@ -56,8 +55,8 @@ const OrderListScreen = () => {
 
   const handleDelete = (id: number) => {
     Alert.alert(
-      "Delete Order",
-      "Are you sure you want to delete this order?",
+      "Eliminar Order",
+      "Estas seguro que quieres eliminar este order?",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -66,7 +65,7 @@ const OrderListScreen = () => {
           onPress: async () => {
             try {
               await deleteOrder(id);
-              Alert.alert("Success", "Order deleted successfully");
+              Alert.alert("Éxito", "Order eliminado exitosamente");
               loadOrders();
             } catch (error) {
               console.error("Error deleting order:", error);
@@ -80,7 +79,7 @@ const OrderListScreen = () => {
 
   const renderItem = ({ item }: { item: Order }) => (
     <View className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-slate-200">
-      {/* Header de la Card con ID y Status */}
+     
       <View className="flex-row justify-between items-center bg-slate-50 px-4 py-2 border-b border-slate-200">
         <View className="flex-row items-center gap-1">
           <Ionicons name="receipt" size={14} color="#64748b" />

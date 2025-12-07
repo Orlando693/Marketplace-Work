@@ -15,20 +15,19 @@ export default function StoreListScreen() {
 
   const loadStores = async () => {
     try {
-      console.log("🔄 Loading stores and users...");
+      console.log("Loading stores and users...");
       const [storesRes, usersRes] = await Promise.all([
         getAllStores(),
         getAllUsers(),
       ]);
       
-      console.log("🏪 Stores response:", storesRes.data);
-      console.log("👥 Users response:", usersRes.data);
+      console.log("Stores response:", storesRes.data);
+      console.log("Users response:", usersRes.data);
       
-      // El backend devuelve ApiResponse<List<StoreResponse>>
       const storesArray = (storesRes.data as any)?.data || storesRes.data;
       const usersArray = (usersRes.data as any)?.data || usersRes.data;
       
-      console.log("✅ Parsed arrays:", {
+      console.log("Parsed arrays:", {
         stores: storesArray?.length || 0,
         users: usersArray?.length || 0
       });
@@ -43,10 +42,10 @@ export default function StoreListScreen() {
         };
       });
       
-      console.log("✨ Enriched stores:", enrichedStores);
+      console.log("Enriched stores:", enrichedStores);
       setStores(enrichedStores);
     } catch (error) {
-      console.error("❌ Error loading stores:", error);
+      console.error("Error loading stores:", error);
       Alert.alert("Error", "Could not load stores");
     } finally {
       setLoading(false);

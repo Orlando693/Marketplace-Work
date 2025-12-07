@@ -1,4 +1,3 @@
-// src/screens/LoginScreen.tsx
 import React, { useState } from "react";
 import { View, Text, TextInput, Pressable, Alert, Platform, ScrollView, Dimensions } from "react-native";
 import { router } from "expo-router";
@@ -31,7 +30,7 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      // Intenta login con el backend
+     
       const res = await api.post("/auth/login", {
         email,
         password,
@@ -109,7 +108,7 @@ export default function LoginScreen() {
           </Text>
         </View>
 
-        {/* Card */}
+        {/* Cartas */}
         <View className="bg-white rounded-3xl p-8 shadow-2xl border border-slate-200">
           <Text className="text-2xl font-bold text-slate-800 mb-6 text-center">
             Welcome Back

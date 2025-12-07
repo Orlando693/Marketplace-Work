@@ -39,19 +39,19 @@ export default function UserListScreen() {
         // Si tiene el campo 'data', es un ApiResponse wrapper
         if ('data' in responseData && Array.isArray(responseData.data)) {
           usersArray = responseData.data;
-          console.log("✅ Extracted from ApiResponse.data:", usersArray.length, "users");
+          console.log("Extracted from ApiResponse.data:", usersArray.length, "users");
         } 
         // Si es directamente un array
         else if (Array.isArray(responseData)) {
           usersArray = responseData;
-          console.log("✅ Direct array response:", usersArray.length, "users");
+          console.log("Direct array response:", usersArray.length, "users");
         }
       }
       
       setUsers(usersArray);
-      console.log("📊 Users set in state:", usersArray.length);
+      console.log("Users set in state:", usersArray.length);
     } catch (error: any) {
-      console.error("❌ Error loading users:", error);
+      console.error("Error loading users:", error);
       console.error("Error details:", error.response?.data || error.message);
       Alert.alert("Error", "Could not load users");
     } finally {
@@ -93,7 +93,6 @@ export default function UserListScreen() {
 
   return (
     <View className="flex-1 bg-slate-50">
-      {/* Modern Header with back button */}
       <View className="bg-white px-6 pt-12 pb-4 border-b border-slate-200 shadow-sm">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">

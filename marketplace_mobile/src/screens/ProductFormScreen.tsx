@@ -1,4 +1,3 @@
-// src/screens/ProductFormScreen.tsx
 import { useState, useEffect } from "react";
 import {
   View,
@@ -44,7 +43,6 @@ export default function ProductFormScreen() {
     if (isEditing) {
       fetchProduct();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
 
   const loadStores = async () => {
@@ -62,7 +60,6 @@ export default function ProductFormScreen() {
     setLoading(true);
     try {
       const res = await getProduct(productId!);
-      // Handle ApiResponse wrapper from backend
       const product = (res.data as any)?.data || res.data;
       setName(product.name);
       setDescription(product.description);
@@ -71,7 +68,6 @@ export default function ProductFormScreen() {
       setIsAvailable(product.isAvailable);
       setStoreId(product.storeId.toString());
       
-      // Set store name from loaded stores
       const selectedStore = stores.find((s) => s.id === product.storeId);
       if (selectedStore) {
         setStoreName(selectedStore.name);
