@@ -1,6 +1,6 @@
 # Marketplace Mobile App - Web Support
 
-## 🚀 Inicio Rápido
+##  Inicio Rápido
 
 ### Ejecutar en Web
 ```bash
@@ -14,7 +14,7 @@ Presiona `w` para abrir en el navegador web o ve a: http://localhost:8081
 - Presiona `i` para iOS simulator
 - Escanea el QR con Expo Go en tu celular
 
-## 🔐 Credenciales de Prueba
+##  Credenciales de Prueba
 
 Para acceder a la aplicación, usa estas credenciales:
 
@@ -25,7 +25,7 @@ Password: admin123
 
 O presiona el botón "Use Test Credentials" en la pantalla de login.
 
-## 🌐 Configuración de Backend
+##  Configuración de Backend
 
 ### Para Web (localhost):
 El archivo `src/services/api.ts` está configurado para detectar automáticamente:
@@ -41,31 +41,31 @@ El archivo `src/services/api.ts` está configurado para detectar automáticament
    ```
 3. Ejemplo: `http://192.168.1.100:8080/api`
 
-## 📱 Módulos Disponibles
+##  Módulos Disponibles
 
-✅ **Users** - Gestión de usuarios
-✅ **Orders** - Gestión de órdenes
-✅ **OrderItems** - Items de órdenes
-✅ **Reviews** - Reseñas de productos
-✅ **Products** - Catálogo de productos
-✅ **Store** - Gestión de tiendas
+**Users** - Gestión de usuarios
+**Orders** - Gestión de órdenes
+**OrderItems** - Items de órdenes
+**Reviews** - Reseñas de productos
+ **Products** - Catálogo de productos
+**Store** - Gestión de tiendas
 
-## 🎨 Diseño Responsivo
+##  Diseño Responsivo
 
 La aplicación ahora está optimizada para:
-- 📱 **Móvil**: Diseño en 2 columnas
-- 💻 **Tablet**: Diseño en 3 columnas
-- 🖥️ **Desktop/Web**: Diseño en 4 columnas con max-width de 1200px
+-  **Móvil**: Diseño en 2 columnas
+-  **Tablet**: Diseño en 3 columnas
+-  **Desktop/Web**: Diseño en 4 columnas con max-width de 1200px
 
-## 🔧 Características Web
+##  Características Web
 
-- ✅ Login responsivo con credenciales de prueba
-- ✅ Dashboard adaptativo según tamaño de pantalla
-- ✅ Navegación optimizada para web
-- ✅ Confirmaciones nativas (alert) en lugar de Alert de React Native
-- ✅ Detección automática de plataforma (Web/iOS/Android)
+-  Login responsivo con credenciales de prueba
+-  Dashboard adaptativo según tamaño de pantalla
+-  Navegación optimizada para web
+-  Confirmaciones nativas (alert) en lugar de Alert de React Native
+-  Detección automática de plataforma (Web/iOS/Android)
 
-## 🐛 Solución de Problemas
+##  Solución de Problemas
 
 ### El login no funciona en web:
 1. Verifica que el backend esté corriendo en `http://localhost:8080`
@@ -84,14 +84,14 @@ O configura CORS globalmente.
 2. Limpia el caché: `npx expo start --clear`
 3. Recarga la página en el navegador
 
-## 📝 Notas Importantes
+##  Notas Importantes
 
 - El login simulado (mock) funciona sin backend para pruebas
 - Las credenciales reales dependen de tu backend
 - AsyncStorage funciona en web usando localStorage
 - Todas las pantallas son responsivas
 
-## 🔄 Actualizar después de cambios
+## Actualizar después de cambios
 
 ```bash
 # Detener el servidor (Ctrl+C)
