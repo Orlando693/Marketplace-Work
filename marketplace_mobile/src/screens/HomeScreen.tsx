@@ -64,7 +64,7 @@ export default function HomeScreen() {
           className="flex-row flex-wrap mb-6"
           style={{ 
             gap: 16,
-            justifyContent: isLargeScreen ? "flex-start" : "space-between" 
+            justifyContent: "center"
           }}
         >
           {/* Users */}
@@ -73,7 +73,8 @@ export default function HomeScreen() {
             className="bg-white rounded-2xl p-5 items-center shadow-lg border-2 border-primary-500"
             style={{ 
               width: isLargeScreen ? "calc(25% - 12px)" : "48%",
-              minWidth: isLargeScreen ? 200 : 150
+              minWidth: isLargeScreen ? 200 : 150,
+              maxWidth: isLargeScreen ? undefined : 160
             }}
           >
             <Ionicons name="people-outline" size={40} color="#3b82f6" />
@@ -90,8 +91,9 @@ export default function HomeScreen() {
             onPress={() => router.push("/order-list")}
             className="bg-white rounded-2xl p-5 items-center shadow-lg border-2 border-slate-800"
             style={{ 
-              width: isLargeScreen ? "calc(25% - 12px)" : "48%",
-              minWidth: isLargeScreen ? 200 : 150
+              width: isLargeScreen ? "23%" : "48%",
+              minWidth: isLargeScreen ? 200 : 150,
+              maxWidth: isLargeScreen ? undefined : 160
             }}
           >
             <Ionicons name="cart-outline" size={40} color="#1e293b" />
@@ -108,8 +110,9 @@ export default function HomeScreen() {
             onPress={() => router.push("/order-item-list")}
             className="bg-white rounded-2xl p-5 items-center shadow-lg border-2 border-success-500"
             style={{ 
-              width: isLargeScreen ? "calc(25% - 12px)" : "48%",
-              minWidth: isLargeScreen ? 200 : 150
+              width: isLargeScreen ? "23%" : "48%",
+              minWidth: isLargeScreen ? 200 : 150,
+              maxWidth: isLargeScreen ? undefined : 160
             }}
           >
             <Ionicons name="cube-outline" size={40} color="#22c55e" />
@@ -126,8 +129,9 @@ export default function HomeScreen() {
             onPress={() => router.push("/review-list")}
             className="bg-white rounded-2xl p-5 items-center shadow-lg border-2 border-blue-400"
             style={{ 
-              width: isLargeScreen ? "calc(25% - 12px)" : "48%",
-              minWidth: isLargeScreen ? 200 : 150
+              width: isLargeScreen ? "23%" : "48%",
+              minWidth: isLargeScreen ? 200 : 150,
+              maxWidth: isLargeScreen ? undefined : 160
             }}
           >
             <Ionicons name="document-text-outline" size={40} color="#60a5fa" />
@@ -144,8 +148,9 @@ export default function HomeScreen() {
             onPress={() => router.push("/product-list")}
             className="bg-white rounded-2xl p-5 items-center shadow-lg border-2 border-warning-500"
             style={{ 
-              width: isLargeScreen ? "calc(25% - 12px)" : "48%",
-              minWidth: isLargeScreen ? 200 : 150
+              width: isLargeScreen ? "23%" : "48%",
+              minWidth: isLargeScreen ? 200 : 150,
+              maxWidth: isLargeScreen ? undefined : 160
             }}
           >
             <Ionicons name="bag-outline" size={40} color="#eab308" />
@@ -162,8 +167,9 @@ export default function HomeScreen() {
             onPress={() => router.push("/store-list")}
             className="bg-white rounded-2xl p-5 items-center shadow-lg border-2 border-slate-500"
             style={{ 
-              width: isLargeScreen ? "calc(25% - 12px)" : "48%",
-              minWidth: isLargeScreen ? 200 : 150
+              width: isLargeScreen ? "23%" : "48%",
+              minWidth: isLargeScreen ? 200 : 150,
+              maxWidth: isLargeScreen ? undefined : 160
             }}
           >
             <Ionicons name="storefront-outline" size={40} color="#64748b" />
